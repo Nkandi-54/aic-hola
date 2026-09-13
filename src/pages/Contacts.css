@@ -1,0 +1,50 @@
+.contact-layout { display: grid; grid-template-columns: .9fr 1.1fr; overflow: hidden; background: rgba(255,255,255,.78); border: 1px solid var(--line); border-radius: 24px; box-shadow: var(--shadow); }.contact-details { padding: 38px; color: #fff; background: var(--forest); }.contact-details .eyebrow { color: #efc886; }.contact-details h2, .contact-form-card h2 { margin: 11px 0 28px; font-family: Georgia, "Times New Roman", serif; font-size: 2rem; letter-spacing: -.045em; }.contact-details > a { display: flex; align-items: center; gap: 13px; margin: 15px 0; padding: 13px 0; border-bottom: 1px solid rgba(255,255,255,.14); color: #fff; text-decoration: none; transition: opacity 160ms ease; }.contact-details > a:hover { opacity: .72; }.contact-details > a > i { display: grid; width: 36px; height: 36px; place-items: center; color: #2c2117; background: #efc886; border-radius: 11px; }.contact-details strong, .contact-details small { display: block; }.contact-details strong { margin-bottom: 2px; font-size: .93rem; }.contact-details small { color: rgba(255,255,255,.72); font-size: .82rem; }.contact-social { display: flex; gap: 10px; margin-top: 30px; }.contact-social a { display: grid; width: 39px; height: 39px; place-items: center; color: #fff; background: rgba(255,255,255,.12); border: 1px solid rgba(255,255,255,.18); border-radius: 50%; }.contact-form-card { padding: 38px; }.contact-form-card h2 { margin-bottom: 6px; }.contact-form-card > div > p { margin: 0; color: var(--muted); line-height: 1.6; }.contact-form-card form { display: grid; gap: 16px; margin-top: 27px; }.contact-form-card label { display: grid; gap: 7px; color: #443a31; font-size: .86rem; font-weight: 750; }.contact-form-card input, .contact-form-card textarea { width: 100%; padding: 12px 13px; color: var(--ink); background: #fffdfa; border: 1px solid var(--line); border-radius: 11px; outline: none; transition: border 160ms ease, box-shadow 160ms ease; }.contact-form-card textarea { min-height: 122px; resize: vertical; }.contact-form-card input:focus, .contact-form-card textarea:focus { border-color: var(--clay); box-shadow: 0 0 0 3px rgba(169,78,50,.12); }.contact-form-card [aria-invalid="true"] { border-color: #bd4d45; }.contact-form-card label small { color: #b23e36; font-size: .78rem; }.contact-form-card button { width: fit-content; border: 0; cursor: pointer; }@media (max-width: 760px) { .contact-layout { grid-template-columns: 1fr; }.contact-details, .contact-form-card { padding: 28px; } }
+/* Illustrated masthead inside the contact details aside. */
+.contact-details { position: relative; overflow: hidden; }
+.contact-details-body { position: relative; z-index: 2; }
+.contact-details .card-art {
+  top: -6px;
+  right: -20px;
+  width: 62%;
+  max-width: 260px;
+  opacity: 0.9;
+  transform: none;
+  filter: drop-shadow(0 10px 22px rgba(0, 0, 0, 0.28));
+}
+.contact-details::before {
+  position: absolute;
+  inset: 0;
+  content: "";
+  background: radial-gradient(120% 90% at 100% 0%, rgba(239, 200, 134, 0.16), transparent 60%);
+  pointer-events: none;
+}
+.contact-details > a {
+  position: relative;
+  z-index: 2;
+}
+/* M-PESA giving card inside the dark contact-details panel. */
+.contact-mpesa {
+  margin-top: 24px;
+  background: rgba(255, 255, 255, 0.06);
+  border-color: rgba(255, 255, 255, 0.14);
+  box-shadow: none;
+}
+.contact-mpesa .mpesa-logo-m {
+  color: #a5e8b8;
+}
+.contact-mpesa .mpesa-logo-pesa {
+  color: #6fe39a;
+}
+.contact-mpesa .mpesa-card-details > div {
+  background: rgba(76, 175, 80, 0.16);
+  border-color: rgba(76, 175, 80, 0.36);
+}
+.contact-mpesa .mpesa-card-details dt {
+  color: rgba(255, 255, 255, 0.66);
+}
+.contact-mpesa .mpesa-card-details dd {
+  color: #fff;
+}
+.contact-mpesa .mpesa-card-note {
+  color: rgba(255, 255, 255, 0.62);
+}

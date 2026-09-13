@@ -1,0 +1,11 @@
+/* Page-level wrapper only */
+.choirs-page {
+  padding: 3rem 1rem;
+}
+
+/* Optional heading container */
+.choirs-heading {
+  max-width: 64rem;
+  margin: 0 auto 3rem auto;
+  text-align: center;
+}

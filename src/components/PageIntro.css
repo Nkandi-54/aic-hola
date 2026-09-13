@@ -1,0 +1,113 @@
+/* Green intro block — the web counterpart of the app's PageIntro. */
+.page-intro {
+  position: relative;
+  overflow: hidden;
+  padding: clamp(28px, 5vw, 46px);
+  margin-bottom: 34px;
+  background:
+    radial-gradient(circle at 84% 15%, rgba(212, 175, 55, 0.24), transparent 28%),
+    linear-gradient(135deg, #0b231a, #315d4a 58%, #173429);
+  border-radius: 26px;
+  border: 1px solid rgba(212, 175, 55, 0.28);
+  box-shadow: var(--shadow-luxury);
+}
+
+.page-intro-centered {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+}
+
+.page-intro-ring {
+  position: absolute;
+  border-radius: 50%;
+  pointer-events: none;
+}
+.page-intro-ring-large {
+  width: 260px;
+  height: 260px;
+  top: -120px;
+  right: -90px;
+  border: 1px solid rgba(255, 255, 255, 0.22);
+}
+.page-intro-ring-small {
+  width: 190px;
+  height: 190px;
+  top: -80px;
+  right: -60px;
+  border: 22px solid rgba(255, 255, 255, 0.06);
+}
+
+.page-intro-watermark {
+  position: absolute;
+  right: -34px;
+  bottom: -58px;
+  width: 210px;
+  height: 210px;
+  object-fit: contain;
+  opacity: 0.18;
+  pointer-events: none;
+}
+
+.page-intro-topline {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  width: 100%;
+}
+
+.page-intro-eyebrow {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  color: #e8c67a;
+  font-size: 0.72rem;
+  font-weight: 800;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+}
+.page-intro-rule {
+  width: 24px;
+  height: 2px;
+  border-radius: 4px;
+  background: currentColor;
+}
+
+.page-intro-icon {
+  display: grid;
+  width: 40px;
+  height: 40px;
+  place-items: center;
+  color: #f5e9da;
+  background: rgba(255, 255, 255, 0.1);
+  border-radius: 13px;
+}
+
+.page-intro-title {
+  position: relative;
+  max-width: 92%;
+  margin: 14px 0 12px;
+  color: #fff9f3;
+  font-family: var(--font-serif);
+  font-size: clamp(2rem, 4.4vw, 3.1rem);
+  font-weight: 700;
+  letter-spacing: -0.05em;
+  line-height: 1.05;
+}
+
+.page-intro-description {
+  position: relative;
+  max-width: 620px;
+  margin: 0;
+  color: #f5e9da;
+  font-size: 1.02rem;
+  line-height: 1.7;
+}
+
+@media (max-width: 620px) {
+  .page-intro-title {
+    max-width: 100%;
+  }
+}

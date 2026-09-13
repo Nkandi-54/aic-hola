@@ -1,0 +1,130 @@
+/* ==========================================================================
+   Sermons Page Styles — AIC Hola Church
+   ========================================================================== */
+
+.sermon-spotlight-card {
+  position: relative;
+  overflow: hidden;
+  margin-bottom: 32px;
+  padding: clamp(24px, 4vw, 36px);
+  background:
+    radial-gradient(100% 120% at 85% 15%, rgba(223, 184, 106, 0.16), transparent 65%),
+    #173429;
+  border: 1px solid rgba(223, 184, 106, 0.4);
+  border-radius: 24px;
+  color: #fff9f3;
+  box-shadow: var(--shadow-luxury, 0 16px 36px rgba(22, 51, 41, 0.18));
+}
+
+.sermon-spotlight-top {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 16px;
+}
+
+.sermon-scripture-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 5px 12px;
+  background: var(--gold, #dfb86a);
+  border-radius: 999px;
+  color: #173429;
+  font-size: 0.72rem;
+  font-weight: 800;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.sermon-spotlight-series {
+  font-size: 0.72rem;
+  font-weight: 800;
+  letter-spacing: 0.14em;
+  color: rgba(223, 184, 106, 0.85);
+  text-transform: uppercase;
+}
+
+.sermon-spotlight-scripture {
+  margin: 0 0 16px;
+  font-family: Georgia, "Times New Roman", serif;
+  font-size: clamp(1.12rem, 2.2vw, 1.35rem);
+  font-style: italic;
+  line-height: 1.55;
+  color: #fff4e3;
+  border-left: 3px solid var(--gold, #dfb86a);
+  padding-left: 16px;
+}
+
+.sermon-spotlight-meta {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  margin-top: 18px;
+}
+
+.sermon-spotlight-author {
+  font-size: 0.82rem;
+  color: rgba(255, 255, 255, 0.7);
+  letter-spacing: 0.02em;
+}
+
+/* --- Daily Scripture Reflection Card ------------------------------------ */
+.sermon-devotion-card {
+  display: flex;
+  align-items: center;
+  gap: 20px;
+  margin-top: 36px;
+  padding: 24px 28px;
+  background: rgba(255, 253, 249, 0.95);
+  border: 1px solid rgba(223, 184, 106, 0.35);
+  border-radius: 20px;
+  box-shadow: 0 8px 24px rgba(22, 51, 41, 0.05);
+}
+
+.sermon-devotion-icon {
+  width: 48px;
+  height: 48px;
+  border-radius: 50%;
+  background: rgba(223, 184, 106, 0.18);
+  border: 1px solid rgba(223, 184, 106, 0.4);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--clay-deep, #9c4323);
+  font-size: 1.25rem;
+  flex-shrink: 0;
+}
+
+.sermon-devotion-body {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.sermon-devotion-title {
+  font-size: 0.76rem;
+  font-weight: 850;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--clay, #c46a44);
+}
+
+.sermon-devotion-quote {
+  margin: 0;
+  font-family: Georgia, "Times New Roman", serif;
+  font-size: 1.05rem;
+  font-style: italic;
+  color: var(--forest-deep, #173429);
+  line-height: 1.5;
+}
+
+@media (max-width: 640px) {
+  .sermon-devotion-card {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 14px;
+    padding: 20px;
+  }
+}

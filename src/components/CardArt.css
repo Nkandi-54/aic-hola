@@ -1,0 +1,207 @@
+/* Illustrated card art — layered SVG scenes in a dedicated header band so the
+   art and the copy never compete for the same space. */
+.content-card {
+  display: flex;
+  flex-direction: column;
+  min-height: 300px;
+  padding: 0;
+  overflow: hidden;
+}
+
+/* The illustration zone: fixed height, tinted by the card accent. */
+.content-card-art {
+  position: relative;
+  height: 148px;
+  overflow: hidden;
+  background: linear-gradient(
+    150deg,
+    color-mix(in srgb, var(--card-accent) 30%, var(--surface)),
+    color-mix(in srgb, var(--card-accent) 8%, var(--surface))
+  );
+}
+.content-card-art::after {
+  position: absolute;
+  inset: 0;
+  content: "";
+  background-image: radial-gradient(rgba(58, 42, 23, 0.16) 1px, transparent 1px);
+  background-size: 12px 12px;
+  -webkit-mask-image: linear-gradient(180deg, black, transparent 88%);
+  mask-image: linear-gradient(180deg, black, transparent 88%);
+  opacity: 0.5;
+  pointer-events: none;
+}
+
+.card-art {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 86%;
+  max-width: 210px;
+  transform: translate(-50%, -50%);
+  pointer-events: none;
+  opacity: 0.96;
+  transition: transform 320ms ease;
+}
+
+/* Small icon chip pinned to the art band's corner. */
+.content-card-badge {
+  position: absolute;
+  z-index: 2;
+  top: 12px;
+  left: 12px;
+  display: grid;
+  width: 38px;
+  height: 38px;
+  place-items: center;
+  color: #2d2219;
+  font-size: 0.98rem;
+  background: var(--card-accent);
+  border-radius: 12px;
+  box-shadow: 0 8px 18px rgba(52, 36, 18, 0.22);
+}
+
+/* Copy sits below the art, on the clean card surface. */
+.content-card-body {
+  position: relative;
+  z-index: 1;
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  padding: 22px 22px 23px;
+}
+
+.content-card-topline {
+  margin-bottom: 10px;
+  min-height: 0;
+}
+.content-card h3 {
+  margin: 0 0 8px;
+  max-width: none;
+}
+.content-card p {
+  max-width: none;
+  margin: 0;
+}
+
+.flashy-card-link:hover .card-art,
+.flashy-card-link:focus-visible .card-art {
+  transform: translate(-50%, -50%) scale(1.08) rotate(-2deg);
+}
+
+/* --- Motion ----------------------------------------------------------------- */
+.art-float {
+  transform-origin: center;
+  animation: art-float 6.5s ease-in-out infinite;
+}
+@keyframes art-float {
+  0%,
+  100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-5px);
+  }
+}
+
+.clock-hand-minute {
+  transform-origin: 150px 96px;
+  animation: spin-minute 12s linear infinite;
+}
+.clock-hand-hour {
+  transform-origin: 150px 96px;
+  animation: spin-minute 144s linear infinite;
+}
+@keyframes spin-minute {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+.art-signal path {
+  animation: signal-pulse 2.6s ease-in-out infinite;
+}
+.art-signal path:nth-child(2) {
+  animation-delay: 0.5s;
+}
+@keyframes signal-pulse {
+  0%,
+  100% {
+    opacity: 0.35;
+  }
+  50% {
+    opacity: 1;
+  }
+}
+
+.art-pulse {
+  animation: dot-pulse 1.8s ease-in-out infinite;
+}
+@keyframes dot-pulse {
+  0%,
+  100% {
+    r: 6;
+    opacity: 1;
+  }
+  50% {
+    r: 9;
+    opacity: 0.55;
+  }
+}
+
+.art-rays {
+  transform-origin: 110px 60px;
+  animation: rays-turn 22s linear infinite;
+}
+@keyframes rays-turn {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+.art-pulse-line {
+  stroke-dasharray: 120;
+  animation: trace 3.4s ease-in-out infinite;
+}
+@keyframes trace {
+  0% {
+    stroke-dashoffset: 120;
+    opacity: 0;
+  }
+  20% {
+    opacity: 1;
+  }
+  80% {
+    opacity: 1;
+  }
+  100% {
+    stroke-dashoffset: 0;
+    opacity: 0;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .art-float,
+  .clock-hand-minute,
+  .clock-hand-hour,
+  .art-signal path,
+  .art-pulse,
+  .art-rays,
+  .art-pulse-line {
+    animation: none;
+  }
+}
+
+@media (max-width: 760px) {
+  .content-card-art {
+    height: 128px;
+  }
+  .content-card {
+    min-height: 0;
+  }
+}

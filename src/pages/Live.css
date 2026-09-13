@@ -1,0 +1,16 @@
+.live-player { padding: 18px; background: #211811; border-radius: 24px; box-shadow: var(--shadow); }.live-player-header { display: flex; align-items: center; justify-content: space-between; gap: 16px; padding: 8px 5px 18px; color: #fff; }.live-player-header h2 { margin: 8px 0 0; font-family: Georgia, "Times New Roman", serif; font-size: 1.55rem; }.live-player-header .text-link { color: #f3cc8d; }.live-status { display: inline-flex; align-items: center; gap: 7px; color: #eac386; font-size: .69rem; font-weight: 800; letter-spacing: .1em; }.live-status span { width: 8px; height: 8px; background: #dd6750; border-radius: 50%; box-shadow: 0 0 0 5px rgba(221,103,80,.16); }.youtube-embed { position: relative; aspect-ratio: 16 / 9; overflow: hidden; background: #100c09; border-radius: 14px; }.youtube-embed-frame { position: absolute; width: 100%; height: 100%; border: 0; }.live-note { display: flex; align-items: center; gap: 18px; margin-top: 28px; padding: 23px 26px; background: rgba(255,255,255,.72); border: 1px solid var(--line); border-radius: 20px; }.live-note > i { display: grid; flex: none; width: 44px; height: 44px; place-items: center; color: #422a16; background: var(--gold); border-radius: 14px; }.live-note h2 { margin: 0 0 4px; font-family: Georgia, "Times New Roman", serif; font-size: 1.35rem; }.live-note p { margin: 0; color: var(--muted); line-height: 1.55; }.live-note .button { flex: none; margin-left: auto; }@media (max-width: 640px) { .live-player { padding: 12px; }.live-player-header { align-items: flex-start; flex-direction: column; }.live-note { align-items: flex-start; flex-wrap: wrap; }.live-note .button { margin: 2px 0 0 62px; } }
+.live-audio-section { display: grid; gap: 16px; margin-top: 28px; }
+.live-audio-heading { max-width: 620px; }
+.live-audio-heading h2 { margin: 10px 0 8px; font-family: Georgia, "Times New Roman", serif; font-size: clamp(1.5rem, 3vw, 2rem); letter-spacing: -0.03em; }
+.live-audio-heading p { margin: 0; color: var(--muted); line-height: 1.6; }
+.live-status-audio { color: #c1452c; }
+.live-status-audio span { background: #c1452c; box-shadow: 0 0 0 5px rgba(193, 69, 44, 0.16); }
+
+.live-audio-list { display: grid; gap: 9px; margin: 0; padding: 0; list-style: none; }
+.live-audio-list li { display: flex; align-items: center; justify-content: space-between; gap: 14px; padding: 13px 16px; background: rgba(255, 255, 255, 0.72); border: 1px solid var(--line); border-radius: 14px; }
+.live-audio-list strong { font-weight: 750; }
+.live-audio-list small { display: block; margin-top: 3px; color: var(--muted); font-size: 0.82rem; }
+
+@media (max-width: 640px) {
+  .live-audio-section { margin-top: 22px; }
+}
