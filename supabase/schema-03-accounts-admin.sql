@@ -311,6 +311,11 @@ create policy "Admins can update profiles" on public.profiles
   using (public.is_admin())
   with check (public.is_admin());
 
+drop policy if exists "Admins can delete profiles" on public.profiles;
+create policy "Admins can delete profiles" on public.profiles
+  for delete to authenticated
+  using (public.is_admin() and id <> auth.uid());
+
 -- Department memberships: staff may read the ones that concern them; only an
 -- administrator may write (enforced again by the membership trigger).
 drop policy if exists "Staff can read memberships" on public.department_memberships;
@@ -361,6 +366,36 @@ grant select on public.account_directory to authenticated;
 -- ---------------------------------------------------------------------------
 -- 6. Grant the new functions to signed-in users
 -- ---------------------------------------------------------------------------
+
+-- Permanently delete an account by an administrator.
+-- Cascades through department heads, memberships, direct messages, profile, and auth record.
+create or replace function public.admin_delete_user(target_user_id uuid)
+returns void
+language plpgsql
+security definer
+set search_path = public, auth
+as $$
+begin
+  if not public.is_admin() then
+    raise exception 'Only an active administrator can delete accounts';
+  end if;
+
+  if target_user_id = auth.uid() then
+    raise exception 'You cannot delete your own administrator account';
+  end if;
+
+  delete from public.department_heads where head_id = target_user_id;
+  delete from public.department_memberships where user_id = target_user_id;
+  if exists (select 1 from information_schema.tables where table_schema = 'public' and table_name = 'direct_messages') then
+    delete from public.direct_messages where sender_id = target_user_id or recipient_id = target_user_id;
+  end if;
+  delete from public.profiles where id = target_user_id;
+  delete from auth.users where id = target_user_id;
+end;
+$$;
+
+revoke all on function public.admin_delete_user(uuid) from anon, authenticated;
+grant execute on function public.admin_delete_user(uuid) to authenticated;
 
 revoke all on function public.claim_admin_seat() from anon, authenticated;
 revoke all on function public.admin_seat_is_open() from anon, authenticated;

@@ -4,23 +4,63 @@ import { updateDepartments, updates } from "../data/updates";
 import { isSupabaseConfigured, supabase } from "../lib/supabase";
 import "./Updates.css";
 
+function MediaVideoPlayer({ url, title }) {
+  if (!url) return null;
+  const ytMatch = url.match(/(?:youtu\.be\/|youtube\.com\/(?:watch\?v=|embed\/|shorts\/))([\w-]{11})/);
+  if (ytMatch) {
+    return (
+      <div className="update-video-wrap">
+        <iframe
+          src={`https://www.youtube-nocookie.com/embed/${ytMatch[1]}`}
+          title={title || "Video"}
+          allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+          allowFullScreen
+          className="update-video-frame"
+        />
+      </div>
+    );
+  }
+  return (
+    <div className="update-video-wrap">
+      <video src={url} controls className="update-video-player" preload="metadata" />
+    </div>
+  );
+}
+
 export default function Updates() {
   const [department, setDepartment] = useState("All");
   const [noticeList, setNoticeList] = useState(updates);
+
   useEffect(() => {
     if (!isSupabaseConfigured) return;
-    const loadNotices = () => supabase.from("notices").select("id,department,title,description,published_at,pinned").order("pinned", { ascending: false }).order("published_at", { ascending: false }).then(({ data }) => {
-      if (!data?.length) return;
-      setNoticeList(data.map((item) => ({ ...item, department: item.department.replaceAll("_", " ").replace(/\b\w/g, (letter) => letter.toUpperCase()), date: new Intl.DateTimeFormat(undefined, { dateStyle: "medium" }).format(new Date(item.published_at)), icon: "fa-bullhorn", accent: "#e7b98d" })));
-    });
+    const loadNotices = () => supabase
+      .from("notices")
+      .select("id,department,title,description,published_at,pinned,image_url,video_url")
+      .order("pinned", { ascending: false })
+      .order("published_at", { ascending: false })
+      .then(({ data }) => {
+        if (!data?.length) return;
+        setNoticeList(data.map((item) => ({
+          ...item,
+          department: item.department.replaceAll("_", " ").replace(/\b\w/g, (letter) => letter.toUpperCase()),
+          date: new Intl.DateTimeFormat(undefined, { dateStyle: "medium" }).format(new Date(item.published_at)),
+          icon: "fa-bullhorn",
+          accent: "#e7b98d",
+          image_url: item.image_url || "",
+          video_url: item.video_url || "",
+        })));
+      });
+
     void loadNotices();
     const channel = supabase.channel("public-notices-sync")
       .on("postgres_changes", { event: "*", schema: "public", table: "notices" }, () => void loadNotices())
       .subscribe();
+
     return () => {
       void supabase.removeChannel(channel);
     };
   }, []);
+
   const visibleUpdates = useMemo(
     () => department === "All" ? noticeList : noticeList.filter((item) => item.department === department),
     [department, noticeList]
@@ -41,9 +81,26 @@ export default function Updates() {
         </div>
         <div className="updates-list">
           {visibleUpdates.map((item) => <article className="update-card" key={item.id}>
-            <div className="update-card-topline"><span className="update-icon" style={{ backgroundColor: item.accent }}><i className={`fa-solid ${item.icon}`} aria-hidden="true" /></span><span className="update-department">{item.department}</span>{item.pinned && <span className="update-pinned">Pinned</span>}</div>
+            <div className="update-card-topline">
+              <span className="update-icon" style={{ backgroundColor: item.accent }}><i className={`fa-solid ${item.icon}`} aria-hidden="true" /></span>
+              <span className="update-department">{item.department}</span>
+              {item.pinned && <span className="update-pinned">Pinned</span>}
+            </div>
+            {item.image_url ? (
+              <div className="update-image-wrap">
+                <img
+                  src={item.image_url}
+                  alt={item.title}
+                  className="update-image"
+                  loading="lazy"
+                />
+              </div>
+            ) : null}
             <h3>{item.title}</h3>
             <p>{item.description}</p>
+            {item.video_url ? (
+              <MediaVideoPlayer url={item.video_url} title={item.title} />
+            ) : null}
             <small>{item.date}</small>
           </article>)}
         </div>

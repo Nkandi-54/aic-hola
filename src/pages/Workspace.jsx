@@ -6,6 +6,20 @@ import { ROLE_LABELS, formatMoney, getTimeGreeting, useAuth } from "../lib/auth"
 
 const QUICK_LINKS = [
   {
+    to: "/pastor-desk",
+    title: "Pastor's Study",
+    description: "Plan the pulpit preaching rota and shepherd through confidential care records.",
+    allow: (auth) => auth.isPastor,
+    tone: "forest",
+  },
+  {
+    to: "/media",
+    title: "Media & Broadcast Studio",
+    description: "Control Sunday live stream broadcast feeds and upload worship audio recordings.",
+    allow: (auth) => auth.canManageMedia || auth.isAdmin || auth.isPastor,
+    tone: "clay",
+  },
+  {
     to: "/manage/events",
     title: "Events & notices",
     description: "Publish updates and keep every department in step.",
@@ -43,6 +57,9 @@ export default function Workspace() {
     events: null,
     records: null,
     balance: null,
+    sermons: null,
+    pastoralVisits: null,
+    recordings: null,
   });
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
@@ -56,63 +73,89 @@ export default function Workspace() {
     setLoading(true);
     setError("");
 
-    const requests = [
-      supabase.from("notices").select("id", { count: "exact", head: true }),
-      supabase.from("events").select("id", { count: "exact", head: true }),
-    ];
+    try {
+      const promises = [
+        supabase.from("notices").select("id", { count: "exact", head: true }),
+        supabase.from("events").select("id", { count: "exact", head: true }),
+      ];
 
-    if (auth.isStaff) {
-      requests.push(
-        supabase.from("records").select("id", { count: "exact", head: true }),
-      );
+      if (auth.isStaff) {
+        promises.push(
+          supabase.from("records").select("id", { count: "exact", head: true }),
+        );
+      } else {
+        promises.push(Promise.resolve({ count: null }));
+      }
+
+      if (auth.isAdmin) {
+        promises.push(
+          supabase.from("account_directory").select("id", { count: "exact", head: true }),
+        );
+      } else {
+        promises.push(Promise.resolve({ count: null }));
+      }
+
+      if (auth.isTreasurer) {
+        promises.push(
+          supabase.from("transactions").select("direction,amount").limit(1000),
+        );
+      } else {
+        promises.push(Promise.resolve({ data: null }));
+      }
+
+      if (auth.isPastor) {
+        promises.push(
+          supabase.from("pulpit_schedule").select("id", { count: "exact", head: true }),
+          supabase.from("pastoral_care_records").select("id", { count: "exact", head: true }),
+        );
+      } else {
+        promises.push(Promise.resolve({ count: null }), Promise.resolve({ count: null }));
+      }
+
+      if (auth.canManageMedia || auth.isAdmin || auth.isPastor) {
+        promises.push(
+          supabase.from("audio_recordings").select("id", { count: "exact", head: true }),
+        );
+      } else {
+        promises.push(Promise.resolve({ count: null }));
+      }
+
+      const [
+        noticesRes,
+        eventsRes,
+        recordsRes,
+        peopleRes,
+        txnsRes,
+        pulpitRes,
+        careRes,
+        mediaRes,
+      ] = await Promise.all(promises);
+
+      let balance = null;
+      if (auth.isTreasurer && txnsRes?.data) {
+        balance = txnsRes.data.reduce(
+          (total, tx) =>
+            total + (tx.direction === "income" ? 1 : -1) * Number(tx.amount || 0),
+          0,
+        );
+      }
+
+      setCounts({
+        notices: noticesRes?.count ?? 0,
+        events: eventsRes?.count ?? 0,
+        records: recordsRes?.count ?? null,
+        people: peopleRes?.count ?? null,
+        balance,
+        sermons: pulpitRes?.count ?? null,
+        pastoralVisits: careRes?.count ?? null,
+        recordings: mediaRes?.count ?? null,
+      });
+    } catch (err) {
+      setError(err.message || "Failed to load dashboard metrics.");
+    } finally {
+      setLoading(false);
     }
-
-    if (auth.isAdmin) {
-      requests.push(
-        supabase
-          .from("account_directory")
-          .select("id", { count: "exact", head: true }),
-      );
-    }
-
-    if (auth.isTreasurer) {
-      requests.push(
-        supabase
-          .from("transactions")
-          .select("direction,amount")
-          .limit(1000),
-      );
-    }
-
-    const results = await Promise.all(requests);
-    const failure = results.find((result) => result.error);
-    if (failure?.error) setError(failure.error.message);
-
-    const next = {
-      notices: results[0].count ?? 0,
-      events: results[1].count ?? 0,
-      records: auth.isStaff ? results[2]?.count ?? 0 : null,
-      people: auth.isAdmin
-        ? results[auth.isStaff ? 3 : 2]?.count ?? 0
-        : null,
-      balance: null,
-    };
-
-    if (auth.isTreasurer) {
-      const transactionIndex = 2 + (auth.isStaff ? 1 : 0) + (auth.isAdmin ? 1 : 0);
-      const transactions = results[transactionIndex]?.data || [];
-      next.balance = transactions.reduce(
-        (total, transaction) =>
-          total +
-          (transaction.direction === "income" ? 1 : -1) *
-            Number(transaction.amount || 0),
-        0,
-      );
-    }
-
-    setCounts(next);
-    setLoading(false);
-  }, [auth.isAdmin, auth.isAuthenticated, auth.isStaff, auth.isTreasurer]);
+  }, [auth.canManageMedia, auth.isAdmin, auth.isAuthenticated, auth.isPastor, auth.isStaff, auth.isTreasurer]);
 
   useEffect(() => {
     void load();
@@ -196,6 +239,27 @@ export default function Workspace() {
             <span>Recorded balance</span>
             <strong>{loading ? "—" : formatMoney(counts.balance)}</strong>
             <small>From the latest 1,000 entries</small>
+          </div>
+        ) : null}
+        {auth.isPastor ? (
+          <>
+            <div className="stat">
+              <span>Pulpit sermons</span>
+              <strong>{loading ? "—" : counts.sermons}</strong>
+              <small>Scheduled services</small>
+            </div>
+            <div className="stat">
+              <span>Pastoral care visits</span>
+              <strong>{loading ? "—" : counts.pastoralVisits}</strong>
+              <small>Confidential care logs</small>
+            </div>
+          </>
+        ) : null}
+        {auth.canManageMedia ? (
+          <div className="stat">
+            <span>Media recordings</span>
+            <strong>{loading ? "—" : counts.recordings}</strong>
+            <small>Audio &amp; live broadcasts</small>
           </div>
         ) : null}
       </section>

@@ -3,6 +3,7 @@ import { Link } from "react-router-dom";
 import PageIntro from "../components/PageIntro";
 import { isSupabaseConfigured, supabase } from "../lib/supabase";
 import { ROLE_LABELS, useAuth } from "../lib/auth";
+import { getAuthRedirectUrl } from "../lib/url";
 import "./Account.css";
 
 export default function Account() {
@@ -15,6 +16,7 @@ export default function Account() {
   const [showPassword, setShowPassword] = useState(false);
 
   const [message, setMessage] = useState("");
+  const [showResendConfirmation, setShowResendConfirmation] = useState(false);
   const [busy, setBusy] = useState(false);
   const [seatOpen, setSeatOpen] = useState(false);
   const [passkeySupported, setPasskeySupported] = useState(false);
@@ -40,13 +42,21 @@ export default function Account() {
     }
 
     try {
-      const { data, error } = await supabase.auth.listPasskeys();
+      const listFn =
+        (supabase.auth.passkey && supabase.auth.passkey.list) ||
+        supabase.auth.listPasskeys;
 
-      if (!error) {
-        setPasskeyCount((data || []).length);
+      if (typeof listFn === "function") {
+        const { data, error } = await listFn.call(
+          supabase.auth.passkey || supabase.auth
+        );
+
+        if (!error && Array.isArray(data)) {
+          setPasskeyCount(data.length);
+        }
       }
     } catch {
-      // Older clients without passkey support simply keep the count at zero.
+      // Older clients or unconfigured passkeys simply keep the count at zero.
     }
   }, [auth.isAuthenticated]);
 
@@ -68,6 +78,7 @@ export default function Account() {
 
     setBusy(true);
     setMessage("");
+    setShowResendConfirmation(false);
 
     try {
       if (!isSupabaseConfigured) {
@@ -85,10 +96,32 @@ export default function Account() {
 
         if (result.error) {
           setMessage(result.error.message);
+          const lower = result.error.message.toLowerCase();
+          if (lower.includes("email not confirmed")) {
+            setMessage(
+              "Your email address has not been confirmed yet. Please check your inbox and spam folder, or click below to resend the confirmation link."
+            );
+            setShowResendConfirmation(true);
+          } else if (lower.includes("invalid login credentials")) {
+            setMessage(
+              "Invalid email or password. If you have not registered yet, click 'Need an account? Register'. If you forgot your password, use the reset option below."
+            );
+          } else if (lower.includes("database error")) {
+            setMessage(
+              "We encountered an unexpected account verification issue. Please try signing in again or reset your password using the link below."
+            );
+          } else {
+            setMessage(result.error.message);
+          }
           return;
         }
 
         setMessage("Signed in successfully.");
+        try {
+          await supabase.rpc("ensure_profile");
+        } catch {
+          // ignore if RPC not available
+        }
         await auth.refresh();
         return;
       }
@@ -100,26 +133,110 @@ export default function Account() {
           data: {
             display_name: displayName.trim(),
           },
+          emailRedirectTo: getAuthRedirectUrl("/account"),
         },
       });
 
       if (result.error) {
+        const lower = result.error.message.toLowerCase();
+        if (lower.includes("email not confirmed")) {
+          setShowResendConfirmation(true);
+        }
         setMessage(result.error.message);
         return;
       }
 
+      // Supabase returns an empty identities array when user enumeration protection is on and account already exists
+      if (
+        result.data?.user &&
+        (!result.data.user.identities ||
+          result.data.user.identities.length === 0)
+      ) {
+        setMessage(
+          "An account with this email address already exists. Please sign in with your password, or use 'Forgot your password?' if you need to reset it."
+        );
+        return;
+      }
+
+      // If a session exists, the account was automatically confirmed and signed in
+      if (result.data?.session) {
+        setMessage("Account created and signed in successfully.");
+        try {
+          await supabase.rpc("ensure_profile");
+        } catch {
+          // ignore
+        }
+        await auth.refresh();
+        return;
+      }
+
+      // If email confirmation is enabled in Supabase project
       setMessage(
-        "Account created. Check your email if confirmation is required."
+        "Account created! Please check your email inbox (and spam folder) to confirm your email before signing in."
       );
 
+      setShowResendConfirmation(true);
       await auth.refresh();
-    } catch {
+    } catch (error) {
       setMessage(
-        "We could not reach account services. Please try again later."
+        error?.message ||
+          "We could not reach account services. Please check your internet connection and try again."
       );
     } finally {
       setBusy(false);
     }
+  };
+
+  const resendConfirmationEmail = async () => {
+    const targetEmail = email.trim();
+    if (!targetEmail) {
+      setMessage("Please enter your email address above first.");
+      return;
+    }
+
+    setBusy(true);
+    try {
+      const { error } = await supabase.auth.resend({
+        type: "signup",
+        email: targetEmail,
+        options: {
+          emailRedirectTo: getAuthRedirectUrl("/account"),
+        },
+      });
+
+      if (error) {
+        setMessage(error.message);
+      } else {
+        setMessage(
+          `A fresh confirmation link has been sent to ${targetEmail}. Please check your inbox and spam folder.`
+        );
+      }
+    } catch (err) {
+      setMessage(
+        err?.message || "Could not resend confirmation email. Please try again."
+      );
+    } finally {
+      setBusy(false);
+    }
+  };
+
+  const formatPasskeyError = (error) => {
+    const msg = error?.message || "";
+    if (
+      msg.toLowerCase().includes("relying party") ||
+      msg.toLowerCase().includes("origin") ||
+      msg.toLowerCase().includes("securityerror") ||
+      error?.name === "SecurityError"
+    ) {
+      const currentHost =
+        typeof window !== "undefined"
+          ? window.location.hostname
+          : "this domain";
+      return `Passkey domain mismatch: The authentication server's WebAuthn Relying Party ID is set to localhost. To enable passkeys on ${currentHost}, update the Site URL in Supabase Dashboard (Authentication > URL Configuration) to https://${currentHost}.`;
+    }
+    return (
+      msg || "Passkey operation was cancelled or could not be completed."
+    );
   };
 
   const signInWithPasskey = async () => {
@@ -139,20 +256,23 @@ export default function Account() {
     setMessage("");
 
     try {
-      const { error } = await supabase.auth.signInWithPasskey();
+      const authMethod =
+        (supabase.auth.passkey && supabase.auth.passkey.authenticate) ||
+        supabase.auth.signInWithPasskey;
+
+      const { error } = await authMethod.call(
+        supabase.auth.passkey || supabase.auth
+      );
 
       if (error) {
-        setMessage(error.message);
+        setMessage(formatPasskeyError(error));
         return;
       }
 
       setMessage("Signed in with your passkey.");
       await auth.refresh();
     } catch (error) {
-      setMessage(
-        error?.message ||
-          "Passkey sign-in was cancelled or could not be completed."
-      );
+      setMessage(formatPasskeyError(error));
     } finally {
       setBusy(false);
     }
@@ -175,10 +295,16 @@ export default function Account() {
     setMessage("");
 
     try {
-      const { error } = await supabase.auth.registerPasskey();
+      const regMethod =
+        (supabase.auth.passkey && supabase.auth.passkey.register) ||
+        supabase.auth.registerPasskey;
+
+      const { error } = await regMethod.call(
+        supabase.auth.passkey || supabase.auth
+      );
 
       if (error) {
-        setMessage(error.message);
+        setMessage(formatPasskeyError(error));
         return;
       }
 
@@ -189,10 +315,7 @@ export default function Account() {
       // The button hides itself as soon as the count comes back non-zero.
       await refreshPasskeys();
     } catch (error) {
-      setMessage(
-        error?.message ||
-          "Passkey registration was cancelled or could not be completed."
-      );
+      setMessage(formatPasskeyError(error));
     } finally {
       setBusy(false);
     }
@@ -456,6 +579,7 @@ export default function Account() {
                 mode === "sign-in" ? "sign-up" : "sign-in"
               );
               setMessage("");
+              setShowResendConfirmation(false);
               setPassword("");
             }}
           >
@@ -475,6 +599,17 @@ export default function Account() {
             <p className="account-message" role="status">
               {message}
             </p>
+          ) : null}
+
+          {showResendConfirmation ? (
+            <button
+              className="button ghost"
+              type="button"
+              onClick={resendConfirmationEmail}
+              disabled={busy}
+            >
+              {busy ? "Sending link…" : "Resend confirmation email"}
+            </button>
           ) : null}
 
           <p className="password-manager-note">

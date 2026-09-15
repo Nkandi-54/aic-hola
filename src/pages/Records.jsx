@@ -4,6 +4,7 @@ import { supabase } from "../lib/supabase";
 import { DEPARTMENTS, departmentLabel } from "../lib/auth";
 
 const RECORD_CLASSES = [
+  "reports",
   "minutes",
   "membership",
   "legal",
@@ -18,12 +19,35 @@ const RECORD_CLASSES = [
 const emptyRecord = {
   id: "",
   title: "",
-  class: "other",
+  class: "reports",
   department: "",
   summary: "",
   reference: "",
   is_confidential: false,
+  image_url: "",
+  video_url: "",
 };
+
+async function uploadMediaFile(file, folder = "records-media") {
+  const cleanName = file.name.replace(/[^a-zA-Z0-9._-]/g, "_");
+  const path = `${folder}/${Date.now()}-${cleanName}`;
+  const { error } = await supabase.storage.from("content-media").upload(path, file, {
+    cacheControl: "3600",
+    upsert: false,
+  });
+  if (error) throw error;
+  const { data } = supabase.storage.from("content-media").getPublicUrl(path);
+  return data.publicUrl;
+}
+
+function sanitizeMediaUrl(val) {
+  if (!val) return "";
+  const trimmed = val.trim();
+  if (/^http:\/\//i.test(trimmed)) {
+    return "https://" + trimmed.slice(7);
+  }
+  return trimmed;
+}
 
 export default function Records() {
   const [folders, setFolders] = useState([]);
@@ -33,6 +57,8 @@ export default function Records() {
   const [filterClass, setFilterClass] = useState("all");
   const [filterDept, setFilterDept] = useState("all");
   const [recordForm, setRecordForm] = useState(emptyRecord);
+  const [uploadingImage, setUploadingImage] = useState(false);
+  const [uploadingVideo, setUploadingVideo] = useState(false);
   const [folderForm, setFolderForm] = useState({
     id: "",
     name: "",
@@ -53,7 +79,7 @@ export default function Records() {
       supabase
         .from("records")
         .select(
-          "id,title,class,department,summary,reference,storage_path,is_confidential,folder_id,created_at",
+          "id,title,class,department,summary,reference,storage_path,image_url,video_url,is_confidential,folder_id,created_at",
         )
         .order("created_at", { ascending: false }),
       supabase
@@ -103,6 +129,8 @@ export default function Records() {
       summary: recordForm.summary,
       reference: recordForm.reference,
       is_confidential: recordForm.is_confidential,
+      image_url: recordForm.image_url || "",
+      video_url: recordForm.video_url || "",
       ...(storagePath ? { storage_path: storagePath } : {}),
     };
     const result = recordForm.id
@@ -176,8 +204,8 @@ export default function Records() {
 
   return (
     <ConsoleLayout
-      title="Digital records"
-      intro="A safe, modern archive for minutes, membership, legal, property and finance records — with a tamper-evident audit trail."
+      title="Digital records & reports"
+      intro="A safe, modern archive for church reports, minutes, membership, legal, property and finance records — with a tamper-evident audit trail."
       allow={(_profile, auth) => auth.isStaff}
       denyMessage="Records are available to staff, department heads, treasurers, administrators and the pastor."
     >
@@ -191,7 +219,7 @@ export default function Records() {
             {
               {
                 browse: "Browse",
-                file: "File a record",
+                file: "File a record / report",
                 folders: "Folders",
                 audit: "Audit trail",
               }[key]
@@ -244,6 +272,7 @@ export default function Records() {
                   <th>Class</th>
                   <th>Department</th>
                   <th>Filed</th>
+                  <th>Media</th>
                   <th>File</th>
                   <th></th>
                 </tr>
@@ -251,7 +280,7 @@ export default function Records() {
               <tbody>
                 {visible.length === 0 ? (
                   <tr>
-                    <td colSpan={6}>
+                    <td colSpan={7}>
                       <p className="empty-state">No records match this view.</p>
                     </td>
                   </tr>
@@ -281,6 +310,44 @@ export default function Records() {
                         {new Date(record.created_at).toLocaleDateString()}
                       </td>
                       <td>
+                        <div className="row" style={{ gap: "6px", alignItems: "center", flexWrap: "wrap" }}>
+                          {record.image_url ? (
+                            <a
+                              href={record.image_url}
+                              target="_blank"
+                              rel="noreferrer"
+                              title="View attached photo"
+                            >
+                              <img
+                                src={record.image_url}
+                                alt="Attachment preview"
+                                style={{
+                                  width: 28,
+                                  height: 28,
+                                  borderRadius: 4,
+                                  objectFit: "cover",
+                                  border: "1px solid var(--line)",
+                                }}
+                              />
+                            </a>
+                          ) : null}
+                          {record.video_url ? (
+                            <a
+                              href={record.video_url}
+                              target="_blank"
+                              rel="noreferrer"
+                              className="badge subtle"
+                              title="Watch attached video"
+                            >
+                              🎬 Video
+                            </a>
+                          ) : null}
+                          {!record.image_url && !record.video_url ? (
+                            <span style={{ color: "var(--muted)" }}>—</span>
+                          ) : null}
+                        </div>
+                      </td>
+                      <td>
                         {record.storage_path ? (
                           <button
                             className="text-link"
@@ -293,6 +360,26 @@ export default function Records() {
                         )}
                       </td>
                       <td className="row end">
+                        <button
+                          className="icon-button"
+                          title="Edit / Amend"
+                          onClick={() => {
+                            setRecordForm({
+                              id: record.id,
+                              title: record.title,
+                              class: record.class,
+                              department: record.department || "",
+                              summary: record.summary || "",
+                              reference: record.reference || "",
+                              is_confidential: Boolean(record.is_confidential),
+                              image_url: record.image_url || "",
+                              video_url: record.video_url || "",
+                            });
+                            setTab("file");
+                          }}
+                        >
+                          ✎
+                        </button>
                         <button
                           className="icon-button"
                           title="Delete"
@@ -313,7 +400,7 @@ export default function Records() {
       {tab === "file" ? (
         <form className="panel form-grid" onSubmit={saveRecord}>
           <h3 className="panel-title span-2">
-            {recordForm.id ? "Amend record" : "File a new record"}
+            {recordForm.id ? "Amend record / report" : "File a record or report"}
           </h3>
           <label className="field span-2">
             <span>Title</span>
@@ -396,16 +483,146 @@ export default function Records() {
             />
           </label>
           <label className="field span-2">
-            <span>Attach file (stored privately)</span>
+            <span>Attach document / PDF (stored privately)</span>
             <input
               className="input"
               type="file"
               onChange={(e) => setFile(e.target.files?.[0] || null)}
             />
           </label>
+
+          <div className="field span-2">
+            <span>Attached Image / Photo</span>
+            <div className="row" style={{ alignItems: "center", gap: "8px", flexWrap: "wrap" }}>
+              <input
+                className="input"
+                placeholder="Paste image URL (https://...) or choose photo"
+                value={recordForm.image_url || ""}
+                onChange={(e) =>
+                  setRecordForm({ ...recordForm, image_url: sanitizeMediaUrl(e.target.value) })
+                }
+                style={{ flex: 1, minWidth: "220px" }}
+              />
+              <label className="button ghost" style={{ cursor: "pointer", margin: 0 }}>
+                <span>{uploadingImage ? "Uploading…" : "Upload Photo"}</span>
+                <input
+                  type="file"
+                  accept="image/*"
+                  style={{ display: "none" }}
+                  disabled={uploadingImage}
+                  onChange={async (e) => {
+                    const file = e.target.files?.[0];
+                    if (!file) return;
+                    try {
+                      setUploadingImage(true);
+                      const url = await uploadMediaFile(file, "report-images");
+                      setRecordForm((prev) => ({ ...prev, image_url: url }));
+                    } catch (err) {
+                      alert(`Image upload failed: ${err.message}`);
+                    } finally {
+                      setUploadingImage(false);
+                    }
+                  }}
+                />
+              </label>
+              {recordForm.image_url ? (
+                <button
+                  type="button"
+                  className="button ghost"
+                  onClick={() => setRecordForm({ ...recordForm, image_url: "" })}
+                >
+                  Clear
+                </button>
+              ) : null}
+            </div>
+            {recordForm.image_url ? (
+              <div style={{ marginTop: 8 }}>
+                <img
+                  src={recordForm.image_url}
+                  alt="Attached preview"
+                  style={{
+                    maxWidth: "200px",
+                    maxHeight: "140px",
+                    objectFit: "cover",
+                    borderRadius: "8px",
+                    border: "1px solid var(--line)",
+                  }}
+                />
+              </div>
+            ) : null}
+          </div>
+
+          <div className="field span-2">
+            <span>Attached Video</span>
+            <div className="row" style={{ alignItems: "center", gap: "8px", flexWrap: "wrap" }}>
+              <input
+                className="input"
+                placeholder="Paste YouTube link or video URL (https://...)"
+                value={recordForm.video_url || ""}
+                onChange={(e) =>
+                  setRecordForm({ ...recordForm, video_url: sanitizeMediaUrl(e.target.value) })
+                }
+                style={{ flex: 1, minWidth: "220px" }}
+              />
+              <label className="button ghost" style={{ cursor: "pointer", margin: 0 }}>
+                <span>{uploadingVideo ? "Uploading…" : "Upload Video"}</span>
+                <input
+                  type="file"
+                  accept="video/*"
+                  style={{ display: "none" }}
+                  disabled={uploadingVideo}
+                  onChange={async (e) => {
+                    const file = e.target.files?.[0];
+                    if (!file) return;
+                    try {
+                      setUploadingVideo(true);
+                      const url = await uploadMediaFile(file, "report-videos");
+                      setRecordForm((prev) => ({ ...prev, video_url: url }));
+                    } catch (err) {
+                      alert(`Video upload failed: ${err.message}`);
+                    } finally {
+                      setUploadingVideo(false);
+                    }
+                  }}
+                />
+              </label>
+              {recordForm.video_url ? (
+                <button
+                  type="button"
+                  className="button ghost"
+                  onClick={() => setRecordForm({ ...recordForm, video_url: "" })}
+                >
+                  Clear
+                </button>
+              ) : null}
+            </div>
+            {recordForm.video_url ? (
+              <div style={{ marginTop: 8 }}>
+                {recordForm.video_url.includes("youtube.com") || recordForm.video_url.includes("youtu.be") ? (
+                  <p className="badge subtle">YouTube video linked: {recordForm.video_url}</p>
+                ) : (
+                  <video
+                    src={recordForm.video_url}
+                    controls
+                    style={{
+                      maxWidth: "240px",
+                      maxHeight: "140px",
+                      borderRadius: "8px",
+                      border: "1px solid var(--line)",
+                    }}
+                  />
+                )}
+              </div>
+            ) : null}
+          </div>
+
           <div className="row span-2">
             <button className="button" disabled={busy}>
-              {busy ? "Filing…" : "File record"}
+              {busy
+                ? "Saving…"
+                : recordForm.id
+                  ? "Update record / report"
+                  : "File record / report"}
             </button>
             <button
               type="button"

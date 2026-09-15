@@ -76,10 +76,19 @@ const Navbar = () => {
             <NavLink to="/contacts" className={getLinkClass} onClick={handleLinkClick}>
               Contacts
             </NavLink>
-            <NavLink to={auth.isStaff ? "/workspace" : "/account"} className="nav-link nav-cta" onClick={handleLinkClick}>
-              <i className="fa-solid fa-shield-halved" aria-hidden="true" />
-              {auth.isStaff ? "Workspace" : "Staff Portal"}
-            </NavLink>
+            {(() => {
+              const portalConfig = auth.isStaff
+                ? { to: "/workspace", label: "Staff Workspace", icon: "fa-solid fa-shield-halved" }
+                : auth.isAuthenticated
+                ? { to: "/account", label: "Member Space", icon: "fa-solid fa-user-check" }
+                : { to: "/account", label: "Church Portal", icon: "fa-solid fa-church" };
+              return (
+                <NavLink to={portalConfig.to} className="nav-link nav-cta" onClick={handleLinkClick}>
+                  <i className={portalConfig.icon} aria-hidden="true" />
+                  {portalConfig.label}
+                </NavLink>
+              );
+            })()}
           </div>
         </div>
       </nav>

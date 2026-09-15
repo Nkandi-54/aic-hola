@@ -135,6 +135,15 @@ export const canEditDepartment = (profile, department, memberships = []) => {
   );
 };
 
+export const isPastor = (profile) =>
+  isActive(profile) && ["pastor", "admin"].includes(profile?.role);
+
+export const canManageMedia = (profile, memberships = []) => {
+  if (!profile || !isActive(profile)) return false;
+  if (isOverseer(profile)) return true;
+  return canEditDepartment(profile, "media", memberships);
+};
+
 // Departments a profile may act on (for pickers).
 export const editableDepartments = (profile, memberships = []) => {
   if (!profile) return [];
@@ -177,12 +186,25 @@ export function useAuth() {
         .select("department")
         .eq("head_id", userId),
     ]);
-    const base = profileResult.data || {
-      id: userId,
-      display_name: "",
-      role: "member",
-      status: "active",
-    };
+    let base = profileResult.data;
+    if (!base && isSupabaseConfigured) {
+      try {
+        const { data: healed } = await supabase.rpc("ensure_profile");
+        if (healed && typeof healed === "object") {
+          base = healed;
+        }
+      } catch {
+        // RPC might not be deployed yet; continue with default
+      }
+    }
+    if (!base) {
+      base = {
+        id: userId,
+        display_name: "",
+        role: "member",
+        status: "active",
+      };
+    }
     const led = (headResult.data || []).map((row) => row.department);
     setProfile({ ...base, ledDepartments: led });
     setMemberships((membershipResult.data || []).map((row) => row.department));
@@ -233,6 +255,8 @@ export function useAuth() {
     isAdmin: isAdmin(profile),
     isOverseer: isOverseer(profile),
     isTreasurer: isTreasurer(profile),
+    isPastor: isPastor(profile),
+    canManageMedia: canManageMedia(profile, memberships),
     isStaff: isStaff(profile),
     signOut,
     refresh: () => loadProfile(session?.user?.id),

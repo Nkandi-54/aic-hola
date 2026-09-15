@@ -10,6 +10,7 @@ import {
   getTimeGreeting,
   useAuth,
 } from "../lib/auth";
+import { getAuthRedirectUrl } from "../lib/url";
 
 /**
  * Administration console.
@@ -102,6 +103,49 @@ export default function Admin({ initialTab = "people" }) {
         ? "Account suspended."
         : "Account reinstated.",
     );
+
+  const deleteAccount = (person) => {
+    if (person.id === auth.profile?.id) {
+      setError("You cannot delete your own administrator account.");
+      return;
+    }
+
+    const name = person.display_name || person.email || "this member";
+    const confirmed = window.confirm(
+      `Are you sure you want to permanently delete the account for "${name}"?\n\nThis will permanently delete their profile, department leadership seats, and church access. This action cannot be undone.`
+    );
+
+    if (!confirmed) return;
+
+    return run(
+      async () => {
+        // Try the administrator delete RPC first
+        const { error: rpcError } = await supabase.rpc("admin_delete_user", {
+          target_user_id: person.id,
+        });
+
+        if (!rpcError) return { error: null };
+
+        // Fallback to manual table cleanup if RPC is pending
+        await supabase
+          .from("department_heads")
+          .delete()
+          .eq("head_id", person.id);
+        await supabase
+          .from("department_memberships")
+          .delete()
+          .eq("user_id", person.id);
+        await supabase
+          .from("direct_messages")
+          .delete()
+          .or(`sender_id.eq.${person.id},recipient_id.eq.${person.id}`);
+
+        return supabase.from("profiles").delete().eq("id", person.id);
+      },
+      `delete-${person.id}`,
+      `Account for "${name}" permanently deleted.`,
+    );
+  };
 
   const appointHead = (dept, headId) =>
     run(
@@ -603,26 +647,48 @@ export default function Admin({ initialTab = "people" }) {
                     </div>
 
                     {!isMe ? (
-                      <button
-                        className={`button ${
-                          suspended ? "" : "ghost"
-                        } person-account-action`}
-                        disabled={
-                          busyId === `status-${person.id}`
-                        }
-                        onClick={() =>
-                          setStatusFor(
-                            person.id,
-                            suspended
-                              ? "active"
-                              : "suspended",
-                          )
-                        }
-                      >
-                        {suspended
-                          ? "Reinstate account"
-                          : "Suspend account"}
-                      </button>
+                      <div style={{ display: "flex", gap: "0.5rem", flexWrap: "wrap", alignItems: "center" }}>
+                        <button
+                          className={`button ${
+                            suspended ? "" : "ghost"
+                          } person-account-action`}
+                          disabled={
+                            busyId === `status-${person.id}` ||
+                            busyId === `delete-${person.id}`
+                          }
+                          onClick={() =>
+                            setStatusFor(
+                              person.id,
+                              suspended
+                                ? "active"
+                                : "suspended",
+                            )
+                          }
+                        >
+                          {suspended
+                            ? "Reinstate account"
+                            : "Suspend account"}
+                        </button>
+
+                        <button
+                          type="button"
+                          className="button ghost person-account-action"
+                          style={{
+                            color: "#c62828",
+                            borderColor: "rgba(198, 40, 40, 0.4)",
+                          }}
+                          disabled={
+                            busyId === `delete-${person.id}` ||
+                            busyId === `status-${person.id}`
+                          }
+                          onClick={() => deleteAccount(person)}
+                          title="Permanently delete this account"
+                        >
+                          {busyId === `delete-${person.id}`
+                            ? "Deleting…"
+                            : "Delete account"}
+                        </button>
+                      </div>
                     ) : (
                       <span className="person-protected-footer">
                         Protected account
@@ -666,6 +732,7 @@ function InvitePanel({ onDone, setStatus, setError }) {
           data: {
             display_name: displayName.trim(),
           },
+          emailRedirectTo: getAuthRedirectUrl("/account"),
         },
       });
 

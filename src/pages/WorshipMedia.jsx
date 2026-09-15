@@ -1,7 +1,18 @@
 import React, { useCallback, useEffect, useState } from "react";
 import ConsoleLayout from "../components/ConsoleLayout";
 import AudioPlayer from "../components/AudioPlayer";
+import YouTubeEmbed from "../components/YouTubeEmbed";
 import { supabase } from "../lib/supabase";
+
+const extractYouTubeId = (input) => {
+  if (!input) return "";
+  const trimmed = input.trim();
+  if (/^[a-zA-Z0-9_-]{11}$/.test(trimmed)) return trimmed;
+  const match = trimmed.match(
+    /(?:youtu\.be\/|youtube\.com\/(?:embed\/|v\/|watch\?v=|live\/|shorts\/))([\w-]{11})/,
+  );
+  return match ? match[1] : trimmed;
+};
 
 const isMissingAudioSchema = (failure) =>
   failure?.code === "42P01" ||
@@ -42,23 +53,45 @@ export default function WorshipMedia() {
   const [error, setError] = useState("");
   const [mediaSetupRequired, setMediaSetupRequired] = useState(false);
   const [busy, setBusy] = useState(false);
+  const [broadcast, setBroadcast] = useState({
+    is_live: false,
+    title: "Sunday Morning Worship Service",
+    service_type: "Main Service",
+    youtube_video_id: "",
+    youtube_playlist_id: "PLxQiFsFVDeJGSPEKPUGPeypbNRHZbfrCC",
+    custom_stream_url: "",
+    announcement: "",
+  });
+  const [broadcastBusy, setBroadcastBusy] = useState(false);
 
   const load = useCallback(async () => {
-    const { data, error: failure } = await supabase
-      .from("audio_recordings")
-      .select(
-        "id,title,description,speaker,storage_path,stream_url,duration_seconds,kind,is_live,is_published,recorded_at,created_at",
-      )
-      .order("created_at", { ascending: false });
-    if (failure) {
-      setMediaSetupRequired(isMissingAudioSchema(failure));
+    const [audioResult, broadcastResult] = await Promise.all([
+      supabase
+        .from("audio_recordings")
+        .select(
+          "id,title,description,speaker,storage_path,stream_url,duration_seconds,kind,is_live,is_published,recorded_at,created_at",
+        )
+        .order("created_at", { ascending: false }),
+      supabase
+        .from("broadcast_settings")
+        .select("*")
+        .eq("id", "primary")
+        .maybeSingle(),
+    ]);
+
+    if (audioResult.error) {
+      setMediaSetupRequired(isMissingAudioSchema(audioResult.error));
       setError(
-        isMissingAudioSchema(failure) ? mediaSchemaMessage : failure.message,
+        isMissingAudioSchema(audioResult.error) ? mediaSchemaMessage : audioResult.error.message,
       );
     } else {
       setMediaSetupRequired(false);
     }
-    setTracks(data || []);
+    setTracks(audioResult.data || []);
+
+    if (broadcastResult.data) {
+      setBroadcast(broadcastResult.data);
+    }
   }, []);
 
   useEffect(() => {
@@ -197,16 +230,75 @@ export default function WorshipMedia() {
     await load();
   };
 
+  const saveBroadcast = async (e) => {
+    e.preventDefault();
+    setBroadcastBusy(true);
+    setStatus("");
+    setError("");
+
+    try {
+      const cleanVideoId = extractYouTubeId(broadcast.youtube_video_id);
+      const payload = {
+        is_live: broadcast.is_live,
+        title: broadcast.title?.trim() || "Sunday Morning Worship Service",
+        service_type: broadcast.service_type || "Main Service",
+        youtube_video_id: cleanVideoId,
+        youtube_playlist_id: broadcast.youtube_playlist_id?.trim() || "PLxQiFsFVDeJGSPEKPUGPeypbNRHZbfrCC",
+        custom_stream_url: broadcast.custom_stream_url ? broadcast.custom_stream_url.trim() : "",
+        announcement: broadcast.announcement ? broadcast.announcement.trim() : "",
+        updated_at: new Date().toISOString(),
+      };
+
+      const { error: bError } = await supabase
+        .from("broadcast_settings")
+        .update(payload)
+        .eq("id", "primary");
+      if (bError) throw bError;
+
+      setBroadcast((prev) => ({ ...prev, ...payload }));
+      setStatus("Broadcast settings saved live! The church public Live page is updated.");
+    } catch (err) {
+      setError(err.message || "Failed to update broadcast settings.");
+    } finally {
+      setBroadcastBusy(false);
+    }
+  };
+
+  const toggleLiveStatus = async () => {
+    setBroadcastBusy(true);
+    setStatus("");
+    setError("");
+    try {
+      const nextLive = !broadcast.is_live;
+      const { error: bError } = await supabase
+        .from("broadcast_settings")
+        .update({ is_live: nextLive, updated_at: new Date().toISOString() })
+        .eq("id", "primary");
+      if (bError) throw bError;
+
+      setBroadcast((prev) => ({ ...prev, is_live: nextLive }));
+      setStatus(
+        nextLive
+          ? "Broadcast is now LIVE on air! Visible on the public Live page."
+          : "Live broadcast concluded. Public page reverted to recent services archive.",
+      );
+    } catch (err) {
+      setError(err.message || "Failed to toggle broadcast status.");
+    } finally {
+      setBroadcastBusy(false);
+    }
+  };
+
   const liveTrack = tracks.find((track) => track.is_live);
 
   return (
     <ConsoleLayout
-      title="Worship media"
-      intro="Publish high-quality service audio and start a live broadcast. Only administrators and the pastor may manage this library."
+      title="Media & Broadcast Studio"
+      intro="Control Sunday live stream broadcast feeds, update YouTube live video links, and publish high-fidelity worship audio recordings."
       allow={(_profile, auth) =>
-        auth.isAdmin || auth.profile?.role === "pastor"
+        auth.canManageMedia || auth.isAdmin || auth.profile?.role === "pastor"
       }
-      denyMessage="Worship media is managed by administrators and the pastor. Ask one of them to publish audio for the church."
+      denyMessage="Worship media is managed by the media department, pastor, and administrators."
     >
       {error ? (
         <section className={`panel ${mediaSetupRequired ? "setup-notice" : ""}`} role="alert">
@@ -228,6 +320,111 @@ export default function WorshipMedia() {
           {status}
         </p>
       ) : null}
+
+      {/* Live Broadcast Switchboard */}
+      <section className="panel" aria-labelledby="broadcast-switchboard-heading">
+        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", flexWrap: "wrap", gap: "12px", marginBottom: "1.2rem" }}>
+          <div>
+            <h3 id="broadcast-switchboard-heading" className="panel-title" style={{ display: "flex", alignItems: "center", gap: "10px" }}>
+              <span
+                style={{
+                  display: "inline-block",
+                  width: "12px",
+                  height: "12px",
+                  borderRadius: "50%",
+                  background: broadcast.is_live ? "#d63031" : "#888",
+                  boxShadow: broadcast.is_live ? "0 0 12px #d63031" : "none",
+                }}
+              />
+              Live Stream Broadcast Control
+            </h3>
+            <p className="panel-sub" style={{ margin: 0 }}>
+              {broadcast.is_live
+                ? "BROADCAST ACTIVE: Service is currently live streaming on the public website and app."
+                : "OFF AIR: Public visitors see the recent services playlist."}
+            </p>
+          </div>
+          <button
+            type="button"
+            className={`button ${broadcast.is_live ? "danger" : "primary"}`}
+            onClick={toggleLiveStatus}
+            disabled={broadcastBusy}
+          >
+            {broadcast.is_live ? "Stop Live Stream (Take Off Air)" : "Go Live On Air"}
+          </button>
+        </div>
+
+        <form onSubmit={saveBroadcast} className="stack">
+          <div className="grid two">
+            <label className="field">
+              <span>YouTube Video ID or Live URL</span>
+              <input
+                className="input"
+                placeholder="e.g. dQw4w9WgXcQ or https://youtube.com/live/..."
+                value={broadcast.youtube_video_id || ""}
+                onChange={(e) =>
+                  setBroadcast({ ...broadcast, youtube_video_id: e.target.value })
+                }
+              />
+              <small style={{ color: "var(--clay)" }}>
+                Paste the YouTube link or 11-char ID for Sunday's active live stream.
+              </small>
+            </label>
+
+            <label className="field">
+              <span>Broadcast Title / Service Name</span>
+              <input
+                className="input"
+                placeholder="e.g. Sunday Morning Worship · Holy Communion"
+                value={broadcast.title || ""}
+                onChange={(e) =>
+                  setBroadcast({ ...broadcast, title: e.target.value })
+                }
+              />
+            </label>
+          </div>
+
+          <div className="grid two">
+            <label className="field">
+              <span>Service Announcement Banner</span>
+              <input
+                className="input"
+                placeholder="e.g. Welcome to Sunday service! Share your prayer requests online."
+                value={broadcast.announcement || ""}
+                onChange={(e) =>
+                  setBroadcast({ ...broadcast, announcement: e.target.value })
+                }
+              />
+            </label>
+
+            <label className="field">
+              <span>Fallback Playlist ID</span>
+              <input
+                className="input"
+                value={broadcast.youtube_playlist_id || ""}
+                onChange={(e) =>
+                  setBroadcast({ ...broadcast, youtube_playlist_id: e.target.value })
+                }
+              />
+            </label>
+          </div>
+
+          <div className="row end">
+            <button type="submit" className="button primary" disabled={broadcastBusy}>
+              {broadcastBusy ? "Saving…" : "Save Broadcast Settings"}
+            </button>
+          </div>
+        </form>
+
+        {broadcast.youtube_video_id ? (
+          <div style={{ marginTop: "1.5rem" }}>
+            <h4 style={{ fontSize: "0.92rem", color: "var(--forest-deep)", marginBottom: "8px" }}>
+              Live Stream Feed Preview ({extractYouTubeId(broadcast.youtube_video_id)})
+            </h4>
+            <YouTubeEmbed videoId={extractYouTubeId(broadcast.youtube_video_id)} title="Media desk live preview" />
+          </div>
+        ) : null}
+      </section>
 
       {liveTrack ? (
         <section className="panel">

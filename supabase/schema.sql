@@ -125,9 +125,32 @@ language plpgsql
 security definer
 set search_path = public
 as $$
+declare
+  raw_name text;
 begin
   insert into public.profiles (id, display_name) values (new.id, coalesce(new.raw_user_meta_data ->> 'display_name', ''));
   insert into public.notifications_preferences (user_id) values (new.id);
+  raw_name := coalesce(new.raw_user_meta_data ->> 'display_name', '');
+
+  insert into public.profiles (id, display_name, role)
+  values (new.id, raw_name, 'member')
+  on conflict (id) do update
+    set display_name = case
+      when public.profiles.display_name is null or public.profiles.display_name = ''
+      then excluded.display_name
+      else public.profiles.display_name
+    end;
+
+  begin
+    insert into public.notifications_preferences (user_id, enabled)
+    values (new.id, true)
+    on conflict (user_id) do nothing;
+  exception when others then
+    null;
+  end;
+
+  return new;
+exception when others then
   return new;
 end;
 $$;
@@ -170,3 +193,13 @@ grant select on public.department_memberships to authenticated;
 grant select, insert, update, delete on public.events to authenticated;
 grant select, insert, update, delete on public.notices to authenticated;
 grant select, insert, update, delete on public.notifications_preferences to authenticated;
+
+-- See also:
+--   supabase/schema-02-roles-finance-records.sql
+--   supabase/schema-03-accounts-admin.sql
+--   supabase/schema-04-worship-audio.sql
+--   supabase/schema-05-treasury-accounting.sql
+--   supabase/schema-06-messaging-moderation.sql
+--   supabase/schema-07-robust-auth.sql
+--   supabase/schema-08-pastoral-and-media-offices.sql
+

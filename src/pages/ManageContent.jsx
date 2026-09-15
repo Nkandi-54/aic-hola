@@ -17,17 +17,34 @@ const emptyEvent = {
   starts_at: "",
   ends_at: "",
   location: "",
+  image_url: "",
+  video_url: "",
 };
+
 const emptyNotice = {
   id: "",
   title: "",
   description: "",
   department: "",
   pinned: false,
+  image_url: "",
+  video_url: "",
 };
 
 const toLocalInput = (value) =>
   value ? new Date(value).toISOString().slice(0, 16) : "";
+
+async function uploadMediaFile(file, folder = "media") {
+  const cleanName = file.name.replace(/[^a-zA-Z0-9._-]/g, "_");
+  const path = `${folder}/${Date.now()}-${cleanName}`;
+  const { error } = await supabase.storage.from("content-media").upload(path, file, {
+    cacheControl: "3600",
+    upsert: false,
+  });
+  if (error) throw error;
+  const { data } = supabase.storage.from("content-media").getPublicUrl(path);
+  return data.publicUrl;
+}
 
 export default function ManageContent() {
   const [tab, setTab] = useState("events");
@@ -42,11 +59,11 @@ export default function ManageContent() {
     const [eventResult, noticeResult] = await Promise.all([
       supabase
         .from("events")
-        .select("id,title,description,department,starts_at,ends_at,location")
+        .select("id,title,description,department,starts_at,ends_at,location,image_url,video_url")
         .order("starts_at", { ascending: false }),
       supabase
         .from("notices")
-        .select("id,title,description,department,pinned,published_at")
+        .select("id,title,description,department,pinned,published_at,image_url,video_url")
         .order("published_at", { ascending: false }),
     ]);
     setEvents(eventResult.data || []);
@@ -62,22 +79,24 @@ export default function ManageContent() {
     auth.isStaff ||
     editableDepartments(profile, auth.memberships).length > 0;
 
-  const saveEvent = async (event) => {
-    event.preventDefault();
+  const saveEvent = async (e) => {
+    e.preventDefault();
     setBusy(true);
     setStatus("");
-    if (!event.department) {
+    if (!eventForm.department) {
       setStatus("Choose a department.");
       setBusy(false);
       return;
     }
     const payload = {
-      title: event.title,
-      description: event.description,
-      department: event.department,
-      starts_at: new Date(event.starts_at).toISOString(),
-      ends_at: new Date(event.ends_at).toISOString(),
-      location: event.location,
+      title: eventForm.title,
+      description: eventForm.description,
+      department: eventForm.department,
+      starts_at: new Date(eventForm.starts_at).toISOString(),
+      ends_at: new Date(eventForm.ends_at).toISOString(),
+      location: eventForm.location,
+      image_url: eventForm.image_url || "",
+      video_url: eventForm.video_url || "",
     };
     const result = eventForm.id
       ? await supabase.from("events").update(payload).eq("id", eventForm.id)
@@ -94,20 +113,22 @@ export default function ManageContent() {
     setBusy(false);
   };
 
-  const saveNotice = async (event) => {
-    event.preventDefault();
+  const saveNotice = async (e) => {
+    e.preventDefault();
     setBusy(true);
     setStatus("");
-    if (!event.department) {
+    if (!noticeForm.department) {
       setStatus("Choose a department.");
       setBusy(false);
       return;
     }
     const payload = {
-      title: event.title,
-      description: event.description,
-      department: event.department,
-      pinned: event.pinned,
+      title: noticeForm.title,
+      description: noticeForm.description,
+      department: noticeForm.department,
+      pinned: noticeForm.pinned,
+      image_url: noticeForm.image_url || "",
+      video_url: noticeForm.video_url || "",
     };
     const result = noticeForm.id
       ? await supabase.from("notices").update(payload).eq("id", noticeForm.id)
@@ -205,6 +226,145 @@ function DepartmentPicker({ value, onChange, auth, profile }) {
   );
 }
 
+function sanitizeMediaUrl(val) {
+  if (!val) return "";
+  const trimmed = val.trim();
+  if (/^http:\/\//i.test(trimmed)) {
+    return "https://" + trimmed.slice(7);
+  }
+  return trimmed;
+}
+
+function MediaAttachmentFields({ form, setForm, prefix = "content" }) {
+  const [uploadingImage, setUploadingImage] = useState(false);
+  const [uploadingVideo, setUploadingVideo] = useState(false);
+
+  return (
+    <>
+      <div className="field span-2">
+        <span>Attached Image / Poster</span>
+        <div className="row" style={{ alignItems: "center", gap: "8px", flexWrap: "wrap" }}>
+          <input
+            className="input"
+            placeholder="Paste image URL (https://...) or choose file"
+            value={form.image_url || ""}
+            onChange={(e) => setForm({ ...form, image_url: sanitizeMediaUrl(e.target.value) })}
+            style={{ flex: 1, minWidth: "220px" }}
+          />
+          <label className="button ghost" style={{ cursor: "pointer", margin: 0 }}>
+            <span>{uploadingImage ? "Uploading…" : "Upload Photo"}</span>
+            <input
+              type="file"
+              accept="image/*"
+              style={{ display: "none" }}
+              disabled={uploadingImage}
+              onChange={async (e) => {
+                const file = e.target.files?.[0];
+                if (!file) return;
+                try {
+                  setUploadingImage(true);
+                  const url = await uploadMediaFile(file, `${prefix}-images`);
+                  setForm((prev) => ({ ...prev, image_url: url }));
+                } catch (err) {
+                  alert(`Image upload failed: ${err.message}`);
+                } finally {
+                  setUploadingImage(false);
+                }
+              }}
+            />
+          </label>
+          {form.image_url ? (
+            <button
+              type="button"
+              className="button ghost"
+              onClick={() => setForm({ ...form, image_url: "" })}
+            >
+              Clear
+            </button>
+          ) : null}
+        </div>
+        {form.image_url ? (
+          <div style={{ marginTop: 8 }}>
+            <img
+              src={form.image_url}
+              alt="Attached preview"
+              style={{
+                maxWidth: "200px",
+                maxHeight: "140px",
+                objectFit: "cover",
+                borderRadius: "8px",
+                border: "1px solid var(--line)",
+              }}
+            />
+          </div>
+        ) : null}
+      </div>
+
+      <div className="field span-2">
+        <span>Attached Video</span>
+        <div className="row" style={{ alignItems: "center", gap: "8px", flexWrap: "wrap" }}>
+          <input
+            className="input"
+            placeholder="Paste YouTube link or video URL (https://...)"
+            value={form.video_url || ""}
+            onChange={(e) => setForm({ ...form, video_url: sanitizeMediaUrl(e.target.value) })}
+            style={{ flex: 1, minWidth: "220px" }}
+          />
+          <label className="button ghost" style={{ cursor: "pointer", margin: 0 }}>
+            <span>{uploadingVideo ? "Uploading…" : "Upload Video"}</span>
+            <input
+              type="file"
+              accept="video/*"
+              style={{ display: "none" }}
+              disabled={uploadingVideo}
+              onChange={async (e) => {
+                const file = e.target.files?.[0];
+                if (!file) return;
+                try {
+                  setUploadingVideo(true);
+                  const url = await uploadMediaFile(file, `${prefix}-videos`);
+                  setForm((prev) => ({ ...prev, video_url: url }));
+                } catch (err) {
+                  alert(`Video upload failed: ${err.message}`);
+                } finally {
+                  setUploadingVideo(false);
+                }
+              }}
+            />
+          </label>
+          {form.video_url ? (
+            <button
+              type="button"
+              className="button ghost"
+              onClick={() => setForm({ ...form, video_url: "" })}
+            >
+              Clear
+            </button>
+          ) : null}
+        </div>
+        {form.video_url ? (
+          <div style={{ marginTop: 8 }}>
+            {form.video_url.includes("youtube.com") || form.video_url.includes("youtu.be") ? (
+              <p className="badge subtle">YouTube video linked: {form.video_url}</p>
+            ) : (
+              <video
+                src={form.video_url}
+                controls
+                style={{
+                  maxWidth: "240px",
+                  maxHeight: "140px",
+                  borderRadius: "8px",
+                  border: "1px solid var(--line)",
+                }}
+              />
+            )}
+          </div>
+        ) : null}
+      </div>
+    </>
+  );
+}
+
 function EventWorkspace({ events, form, setForm, onSave, onDelete, busy }) {
   const auth = useAuth();
   return (
@@ -264,6 +424,7 @@ function EventWorkspace({ events, form, setForm, onSave, onDelete, busy }) {
             onChange={(e) => setForm({ ...form, description: e.target.value })}
           />
         </label>
+        <MediaAttachmentFields form={form} setForm={setForm} prefix="event" />
         <div className="row span-2">
           <button className="button" disabled={busy}>
             {busy ? "Saving…" : form.id ? "Update event" : "Publish event"}
@@ -272,17 +433,7 @@ function EventWorkspace({ events, form, setForm, onSave, onDelete, busy }) {
             <button
               type="button"
               className="button ghost"
-              onClick={() =>
-                setForm({
-                  id: "",
-                  title: "",
-                  description: "",
-                  department: "",
-                  starts_at: "",
-                  ends_at: "",
-                  location: "",
-                })
-              }
+              onClick={() => setForm(emptyEvent)}
             >
               Cancel
             </button>
@@ -299,13 +450,14 @@ function EventWorkspace({ events, form, setForm, onSave, onDelete, busy }) {
                 <th>Title</th>
                 <th>Department</th>
                 <th>When</th>
+                <th>Media</th>
                 <th></th>
               </tr>
             </thead>
             <tbody>
               {events.length === 0 ? (
                 <tr>
-                  <td colSpan={4}>
+                  <td colSpan={5}>
                     <p className="empty-state">No events yet.</p>
                   </td>
                 </tr>
@@ -323,6 +475,13 @@ function EventWorkspace({ events, form, setForm, onSave, onDelete, busy }) {
                       </td>
                       <td>{departmentLabel(event.department)}</td>
                       <td>{new Date(event.starts_at).toLocaleString()}</td>
+                      <td>
+                        <div className="row" style={{ gap: "4px", flexWrap: "wrap" }}>
+                          {event.image_url ? <span className="badge subtle" title="Image attached">📷 Photo</span> : null}
+                          {event.video_url ? <span className="badge subtle" title="Video attached">🎬 Video</span> : null}
+                          {!event.image_url && !event.video_url ? <span style={{ color: "var(--muted)" }}>—</span> : null}
+                        </div>
+                      </td>
                       <td className="row end">
                         {canEdit ? (
                           <button
@@ -331,6 +490,8 @@ function EventWorkspace({ events, form, setForm, onSave, onDelete, busy }) {
                             onClick={() =>
                               setForm({
                                 ...event,
+                                image_url: event.image_url || "",
+                                video_url: event.video_url || "",
                                 starts_at: toLocalInput(event.starts_at),
                                 ends_at: toLocalInput(event.ends_at),
                               })
@@ -407,6 +568,7 @@ function NoticeWorkspace({ notices, form, setForm, onSave, onDelete, busy }) {
             onChange={(e) => setForm({ ...form, description: e.target.value })}
           />
         </label>
+        <MediaAttachmentFields form={form} setForm={setForm} prefix="notice" />
         <div className="row span-2">
           <button className="button" disabled={busy}>
             {busy ? "Saving…" : form.id ? "Update notice" : "Publish notice"}
@@ -415,15 +577,7 @@ function NoticeWorkspace({ notices, form, setForm, onSave, onDelete, busy }) {
             <button
               type="button"
               className="button ghost"
-              onClick={() =>
-                setForm({
-                  id: "",
-                  title: "",
-                  description: "",
-                  department: "",
-                  pinned: false,
-                })
-              }
+              onClick={() => setForm(emptyNotice)}
             >
               Cancel
             </button>
@@ -440,13 +594,14 @@ function NoticeWorkspace({ notices, form, setForm, onSave, onDelete, busy }) {
                 <th>Title</th>
                 <th>Department</th>
                 <th>Pinned</th>
+                <th>Media</th>
                 <th></th>
               </tr>
             </thead>
             <tbody>
               {notices.length === 0 ? (
                 <tr>
-                  <td colSpan={4}>
+                  <td colSpan={5}>
                     <p className="empty-state">No notices yet.</p>
                   </td>
                 </tr>
@@ -464,6 +619,13 @@ function NoticeWorkspace({ notices, form, setForm, onSave, onDelete, busy }) {
                       </td>
                       <td>{departmentLabel(notice.department)}</td>
                       <td>{notice.pinned ? "Yes" : "—"}</td>
+                      <td>
+                        <div className="row" style={{ gap: "4px", flexWrap: "wrap" }}>
+                          {notice.image_url ? <span className="badge subtle" title="Image attached">📷 Photo</span> : null}
+                          {notice.video_url ? <span className="badge subtle" title="Video attached">🎬 Video</span> : null}
+                          {!notice.image_url && !notice.video_url ? <span style={{ color: "var(--muted)" }}>—</span> : null}
+                        </div>
+                      </td>
                       <td className="row end">
                         {canEdit ? (
                           <button
@@ -476,6 +638,8 @@ function NoticeWorkspace({ notices, form, setForm, onSave, onDelete, busy }) {
                                 description: notice.description,
                                 department: notice.department,
                                 pinned: Boolean(notice.pinned),
+                                image_url: notice.image_url || "",
+                                video_url: notice.video_url || "",
                               })
                             }
                           >

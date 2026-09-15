@@ -85,6 +85,7 @@ function Footer() {
           <p>© {new Date().getFullYear()} AIC Hola Church. All rights reserved.</p>
           <div className="footer-bottom-links">
             <Link to="/privacy" className="footer-legal-link">Privacy &amp; Data Rights</Link>
+            <Link to="/account" className="footer-legal-link">Church Portal</Link>
           </div>
           <div className="footer-values-badge">
             <span>Faith</span>

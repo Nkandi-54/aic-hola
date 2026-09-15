@@ -19,6 +19,7 @@ import ManageContent from "./pages/ManageContent";
 import Treasury from "./pages/Treasury";
 import Records from "./pages/Records";
 import WorshipMedia from "./pages/WorshipMedia";
+import PastorDesk from "./pages/PastorDesk";
 import Workspace from "./pages/Workspace";
 import Privacy from "./pages/Privacy";
 import NotFound from "./pages/NotFound";
@@ -55,6 +56,7 @@ function App() {
             <Route path="/treasury" element={<Treasury />} />
             <Route path="/records" element={<Records />} />
             <Route path="/media" element={<WorshipMedia />} />
+            <Route path="/pastor-desk" element={<PastorDesk />} />
             <Route path="/privacy" element={<Privacy />} />
             <Route path="*" element={<NotFound />} />
           </Routes>

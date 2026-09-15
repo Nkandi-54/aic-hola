@@ -2,6 +2,7 @@ import React, { useEffect, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import PageIntro from "../components/PageIntro";
 import { isSupabaseConfigured, supabase } from "../lib/supabase";
+import { getAuthRedirectUrl } from "../lib/url";
 import "./Account.css";
 
 export default function ResetPassword() {
@@ -59,7 +60,7 @@ export default function ResetPassword() {
         return;
       }
 
-      const redirectTo = `${window.location.origin}/reset-password`;
+      const redirectTo = getAuthRedirectUrl("/reset-password");
 
       const { error } =
         await supabase.auth.resetPasswordForEmail(

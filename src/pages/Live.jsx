@@ -18,6 +18,7 @@ export default function Live() {
   const [alertsEnabled, setAlertsEnabled] = useState(false);
   const [liveTrack, setLiveTrack] = useState(null);
   const [recordings, setRecordings] = useState([]);
+  const [broadcast, setBroadcast] = useState(null);
   const latestId = useRef(null);
 
   useEffect(() => {
@@ -40,24 +41,34 @@ export default function Live() {
     return () => window.clearInterval(interval);
   }, [alertsEnabled]);
 
-  // Load worship audio: the live broadcast (which auto-plays) and the latest
-  // published recordings for on-demand listening.
+  // Load worship audio and live broadcast switchboard settings
   const loadAudio = useCallback(async () => {
     if (!isSupabaseConfigured) return;
-    const { data, error } = await supabase
-      .from("audio_recordings")
-      .select(
-        "id,title,description,speaker,storage_path,stream_url,is_live,is_published,recorded_at,created_at",
-      )
-      .eq("is_published", true)
-      .order("created_at", { ascending: false })
-      .limit(20);
+    const [audioRes, broadcastRes] = await Promise.all([
+      supabase
+        .from("audio_recordings")
+        .select(
+          "id,title,description,speaker,storage_path,stream_url,is_live,is_published,recorded_at,created_at",
+        )
+        .eq("is_published", true)
+        .order("created_at", { ascending: false })
+        .limit(20),
+      supabase
+        .from("broadcast_settings")
+        .select("*")
+        .eq("id", "primary")
+        .maybeSingle(),
+    ]);
 
-    if (error) return;
+    if (!audioRes.error && audioRes.data) {
+      const rows = audioRes.data;
+      setLiveTrack(rows.find((row) => row.is_live) || null);
+      setRecordings(rows.filter((row) => !row.is_live));
+    }
 
-    const rows = data || [];
-    setLiveTrack(rows.find((row) => row.is_live) || null);
-    setRecordings(rows.filter((row) => !row.is_live));
+    if (!broadcastRes.error && broadcastRes.data) {
+      setBroadcast(broadcastRes.data);
+    }
   }, []);
 
   useEffect(() => {
@@ -67,6 +78,22 @@ export default function Live() {
     return () => window.clearInterval(interval);
   }, [loadAudio]);
 
+  // Real-time synchronization for instant go-live broadcasts
+  useEffect(() => {
+    if (!isSupabaseConfigured) return undefined;
+    const channel = supabase
+      .channel("live-page-broadcast-sync")
+      .on(
+        "postgres_changes",
+        { event: "*", schema: "public", table: "broadcast_settings" },
+        () => void loadAudio(),
+      )
+      .subscribe();
+    return () => {
+      void supabase.removeChannel(channel);
+    };
+  }, [loadAudio]);
+
   const enableAlerts = async () => {
     if (!("Notification" in window)) return;
     const permission = await Notification.requestPermission();
@@ -74,6 +101,7 @@ export default function Live() {
   };
 
   const liveSource = audioSourceFor(liveTrack);
+  const isLiveVideo = Boolean(broadcast?.is_live && broadcast?.youtube_video_id);
 
   return (
     <div className="page-shell">
@@ -81,29 +109,56 @@ export default function Live() {
         <span className="eyebrow">Worship from wherever you are</span>
         <h1>Watch services and recent recordings.</h1>
         <p>
-          Join us online through our YouTube playlist. New services will appear
-          there as they are published.
+          {isLiveVideo
+            ? "We are broadcasting live now! Join our online sanctuary service in worship."
+            : "Join us online through our YouTube playlist. New services appear here as they are published."}
         </p>
       </header>
 
       <section className="live-player">
         <div className="live-player-header">
           <div>
-            <span className="live-status">
-              <span aria-hidden="true" /> ON YOUTUBE
-            </span>
-            <h2>Recent services</h2>
+            {isLiveVideo ? (
+              <span className="live-status" style={{ background: "#d63031", color: "#fff", borderColor: "#ff7675" }}>
+                <span className="live-pulse" aria-hidden="true" /> BROADCASTING LIVE NOW
+              </span>
+            ) : (
+              <span className="live-status">
+                <span aria-hidden="true" /> ON YOUTUBE
+              </span>
+            )}
+            <h2>{isLiveVideo ? broadcast.title || "Sunday Worship Service" : "Recent services"}</h2>
+            {isLiveVideo && broadcast?.announcement ? (
+              <p style={{ margin: "6px 0 0", color: "var(--clay)", fontWeight: "600", fontSize: "0.95rem" }}>
+                {broadcast.announcement}
+              </p>
+            ) : null}
           </div>
-          <a
-            className="text-link"
-            href={PLAYLIST_URL}
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Open full playlist <span aria-hidden="true">↗</span>
-          </a>
+          {isLiveVideo ? (
+            <a
+              className="text-link"
+              href={`https://www.youtube.com/watch?v=${broadcast.youtube_video_id}`}
+              target="_blank"
+              rel="noopener noreferrer"
+            >
+              Watch on YouTube <span aria-hidden="true">↗</span>
+            </a>
+          ) : (
+            <a
+              className="text-link"
+              href={PLAYLIST_URL}
+              target="_blank"
+              rel="noopener noreferrer"
+            >
+              Open full playlist <span aria-hidden="true">↗</span>
+            </a>
+          )}
         </div>
-        <YouTubeEmbed playlistId={PLAYLIST_ID} title="AIC Hola recent services" />
+        {isLiveVideo ? (
+          <YouTubeEmbed videoId={broadcast.youtube_video_id} title={broadcast.title || "AIC Hola live service"} />
+        ) : (
+          <YouTubeEmbed playlistId={broadcast?.youtube_playlist_id || PLAYLIST_ID} title="AIC Hola recent services" />
+        )}
       </section>
 
       {liveSource ? (
