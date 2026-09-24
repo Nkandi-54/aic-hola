@@ -1,6 +1,6 @@
 import React from "react";
 import { NavLink, Link } from "react-router-dom";
-import { useAuth } from "../lib/auth";
+import { useAuth, isPastor, canManageMedia } from "../lib/auth";
 
 /**
  * Every console page a signed-in staff member can reach, in one place. Each
@@ -10,11 +10,12 @@ import { useAuth } from "../lib/auth";
  */
 export const CONSOLE_PAGES = [
   { to: "/workspace", label: "Workspace home", end: true, allow: (a) => a.isStaff },
-  { to: "/admin/people", label: "People & roles", end: true, allow: (a) => a.isAdmin },
-  { to: "/admin/departments", label: "Department heads", end: true, allow: (a) => a.isAdmin },
+  { to: "/admin/people", label: "People & directory", end: true, allow: (a) => a.isAdmin || a.isPastor },
+  { to: "/admin/departments", label: "Department heads", end: true, allow: (a) => a.isAdmin || a.isPastor },
   { to: "/admin/invitations", label: "Add a person", end: true, allow: (a) => a.isAdmin },
   { to: "/manage/events", label: "Events & notices", allow: (a) => a.canPublish },
-  { to: "/media", label: "Worship media", allow: (a) => a.canPublishMedia },
+  { to: "/media", label: "Worship media", allow: (a) => a.canManageMedia || a.isAdmin || a.isPastor },
+  { to: "/pastor-desk", label: "Pastor's Study", end: true, allow: (a) => a.isPastor },
   { to: "/treasury", label: "Treasury", allow: (a) => a.isTreasurer },
   { to: "/records", label: "Digital records", allow: (a) => a.isStaff },
 ];
@@ -41,7 +42,12 @@ export default function ConsoleLayout({
   const { profile, loading, isAuthenticated, isSuspended } = auth;
   // Authorship of worship media: exactly who may publish events & notices.
   const canPublish = Boolean(auth.isStaff);
-  const navAuth = { ...auth, canPublish, canPublishMedia: canPublish };
+  const navAuth = {
+    ...auth,
+    canPublish,
+    canPublishMedia: canManageMedia(profile, auth.memberships),
+    isPastor: isPastor(profile),
+  };
   const navItems = CONSOLE_PAGES.filter((page) => page.allow(navAuth));
 
   if (loading) {

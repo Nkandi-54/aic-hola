@@ -194,19 +194,40 @@ export default function Admin({ initialTab = "people" }) {
     [auth.profile?.display_name],
   );
 
+  const isPastorOnly = !auth.isAdmin && auth.isPastor;
+
   return (
     <ConsoleLayout
-      title={`${getTimeGreeting(firstName)} · Administration`}
-      intro="Assign church-wide roles and appoint a head for every department. Only administrators and the pastor hold authority over all departments."
-      allow={(_profile, authContext) => authContext.isAdmin}
-      denyMessage="Only administrators can open the administration console. The pastor shares authority over every department, but managing people and roles is reserved for administrators."
+      title={
+        isPastorOnly
+          ? `${getTimeGreeting(firstName)} · Congregation Directory`
+          : `${getTimeGreeting(firstName)} · Administration`
+      }
+      intro={
+        isPastorOnly
+          ? "Spiritual shepherd oversight: view registered members, contact information, active status, and ministry departments across the congregation."
+          : "Assign church-wide roles and appoint a head for every department. Only administrators and the pastor hold authority over all departments."
+      }
+      allow={(_profile, authContext) => authContext.isAdmin || authContext.isPastor}
+      denyMessage="Only administrators and the pastor can open the congregation directory and administration console."
     >
       <section className="workspace-hero" style={{ marginBottom: "1.5rem" }}>
         <div>
-          <span className="eyebrow">Hola Command Centre · {new Intl.DateTimeFormat("en-KE", { weekday: "long", hour: "numeric", minute: "2-digit", timeZone: "Africa/Nairobi" }).format(new Date())} EAT</span>
+          <span className="eyebrow">
+            {isPastorOnly ? "Pastoral Roster" : "Hola Command Centre"} ·{" "}
+            {new Intl.DateTimeFormat("en-KE", {
+              weekday: "long",
+              hour: "numeric",
+              minute: "2-digit",
+              timeZone: "Africa/Nairobi",
+            }).format(new Date())}{" "}
+            EAT
+          </span>
           <h3>{getTimeGreeting(firstName)}.</h3>
           <p>
-            You hold church-wide administrative authority. Oversee registered accounts, assign ministry leadership roles, and steward church governance with accountability.
+            {isPastorOnly
+              ? "Browse the church congregation roster to support pastoral care, fellowship, prayer, and ministry follow-up. Administrative account management and role assignments are stewarded by church administrators."
+              : "You hold church-wide administrative authority. Oversee registered accounts, assign ministry leadership roles, and steward church governance with accountability."}
           </p>
         </div>
         <span className="workspace-mark" aria-hidden="true">✦</span>
@@ -214,9 +235,9 @@ export default function Admin({ initialTab = "people" }) {
 
       <div className="row">
         {[
-          ["people", "People & roles"],
+          ["people", isPastorOnly ? "People & directory" : "People & roles"],
           ["heads", "Department heads"],
-          ["invite", "Add a person"],
+          ...(!isPastorOnly ? [["invite", "Add a person"]] : []),
         ].map(([key, label]) => (
           <button
             key={key}
@@ -287,32 +308,38 @@ export default function Admin({ initialTab = "people" }) {
                 </small>
               </div>
 
-              <select
-                className="select"
-                style={{ maxWidth: 280 }}
-                value={headFor(dept.value)}
-                disabled={busyId === `head-${dept.value}`}
-                onChange={(event) =>
-                  appointHead(dept.value, event.target.value)
-                }
-              >
-                <option value="">— None —</option>
+              {isPastorOnly ? (
+                <span className="badge subtle">
+                  {people.find((p) => p.id === headFor(dept.value))?.display_name || "No head appointed"}
+                </span>
+              ) : (
+                <select
+                  className="select"
+                  style={{ maxWidth: 280 }}
+                  value={headFor(dept.value)}
+                  disabled={busyId === `head-${dept.value}`}
+                  onChange={(event) =>
+                    appointHead(dept.value, event.target.value)
+                  }
+                >
+                  <option value="">— None —</option>
 
-                {people.map((person) => (
-                  <option
-                    key={person.id}
-                    value={person.id}
-                    disabled={person.status === "suspended"}
-                  >
-                    {person.display_name ||
-                      person.email ||
-                      person.id.slice(0, 8)}
-                    {person.status === "suspended"
-                      ? " (suspended)"
-                      : ""}
-                  </option>
-                ))}
-              </select>
+                  {people.map((person) => (
+                    <option
+                      key={person.id}
+                      value={person.id}
+                      disabled={person.status === "suspended"}
+                    >
+                      {person.display_name ||
+                        person.email ||
+                        person.id.slice(0, 8)}
+                      {person.status === "suspended"
+                        ? " (suspended)"
+                        : ""}
+                    </option>
+                  ))}
+                </select>
+              )}
             </div>
           ))}
         </div>
@@ -447,30 +474,36 @@ export default function Admin({ initialTab = "people" }) {
                         </p>
                       </div>
 
-                      <select
-                        className="select person-role-select"
-                        value={person.role}
-                        disabled={
-                          busyId === person.id || isMe
-                        }
-                        title={
-                          isMe
-                            ? "Your administrator account is protected."
-                            : roleDescription
-                        }
-                        onChange={(event) =>
-                          updateRole(
-                            person.id,
-                            event.target.value,
-                          )
-                        }
-                      >
-                        {ASSIGNABLE_ROLES.map((role) => (
-                          <option key={role} value={role}>
-                            {ROLE_LABELS[role]}
-                          </option>
-                        ))}
-                      </select>
+                      {isPastorOnly ? (
+                        <span className="badge subtle" style={{ alignSelf: "center" }}>
+                          {ROLE_LABELS[person.role] || person.role}
+                        </span>
+                      ) : (
+                        <select
+                          className="select person-role-select"
+                          value={person.role}
+                          disabled={
+                            busyId === person.id || isMe
+                          }
+                          title={
+                            isMe
+                              ? "Your administrator account is protected."
+                              : roleDescription
+                          }
+                          onChange={(event) =>
+                            updateRole(
+                              person.id,
+                              event.target.value,
+                            )
+                          }
+                        >
+                          {ASSIGNABLE_ROLES.map((role) => (
+                            <option key={role} value={role}>
+                              {ROLE_LABELS[role]}
+                            </option>
+                          ))}
+                        </select>
+                      )}
                     </div>
                   </div>
 
@@ -565,47 +598,49 @@ export default function Admin({ initialTab = "people" }) {
                         </span>
                       </div>
 
-                      <details className="membership-details">
-                        <summary>
-                          {isMe
-                            ? "Manage memberships"
-                            : "Edit memberships"}
-                        </summary>
+                      {!isPastorOnly && (
+                        <details className="membership-details">
+                          <summary>
+                            {isMe
+                              ? "Manage memberships"
+                              : "Edit memberships"}
+                          </summary>
 
-                        <div className="membership-editor">
-                          {DEPARTMENTS.map((dept) => {
-                            const held = departments.includes(
-                              dept.value,
-                            );
+                          <div className="membership-editor">
+                            {DEPARTMENTS.map((dept) => {
+                              const held = departments.includes(
+                                dept.value,
+                              );
 
-                            return (
-                              <button
-                                key={dept.value}
-                                type="button"
-                                className={`membership-button ${
-                                  held ? "is-held" : ""
-                                }`}
-                                disabled={
-                                  busyId ===
-                                  `member-${person.id}-${dept.value}`
-                                }
-                                onClick={() =>
-                                  toggleMembership(
-                                    person,
-                                    dept.value,
-                                  )
-                                }
-                              >
-                                <span>
-                                  {held ? "✓" : "+"}
-                                </span>
+                              return (
+                                <button
+                                  key={dept.value}
+                                  type="button"
+                                  className={`membership-button ${
+                                    held ? "is-held" : ""
+                                  }`}
+                                  disabled={
+                                    busyId ===
+                                    `member-${person.id}-${dept.value}`
+                                  }
+                                  onClick={() =>
+                                    toggleMembership(
+                                      person,
+                                      dept.value,
+                                    )
+                                  }
+                                >
+                                  <span>
+                                    {held ? "✓" : "+"}
+                                  </span>
 
-                                {dept.label}
-                              </button>
-                            );
-                          })}
-                        </div>
-                      </details>
+                                  {dept.label}
+                                </button>
+                              );
+                            })}
+                          </div>
+                        </details>
+                      )}
                     </div>
 
                     <div className="person-departments">
@@ -646,7 +681,11 @@ export default function Admin({ initialTab = "people" }) {
                       )}
                     </div>
 
-                    {!isMe ? (
+                    {isPastorOnly ? (
+                      <span className="badge subtle" style={{ fontSize: "0.78rem" }}>
+                        Pastoral Roster · Confidential Shepherding
+                      </span>
+                    ) : !isMe ? (
                       <div style={{ display: "flex", gap: "0.5rem", flexWrap: "wrap", alignItems: "center" }}>
                         <button
                           className={`button ${
