@@ -159,74 +159,75 @@
 }
 
 /* --- Giving Hub: grand home page stewardship block ----------------------- */
+/* --- Giving Hub: compact, elegant, proportionate block ----------------- */
 .mpesa-hub {
   background: var(--surface, #fffefb);
   border: 1.5px solid rgba(212, 175, 55, 0.38);
-  border-radius: 24px;
-  padding: clamp(24px, 4vw, 36px);
-  box-shadow: var(--shadow-luxury, 0 16px 36px rgba(33, 24, 17, 0.08));
+  border-radius: 18px;
+  padding: 20px 22px;
+  box-shadow: 0 10px 28px rgba(33, 24, 17, 0.06);
   display: flex;
   flex-direction: column;
-  gap: 20px;
+  gap: 14px;
 }
 
 .mpesa-hub-header {
   display: flex;
-  flex-direction: column;
-  gap: 8px;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  flex-wrap: wrap;
 }
 
 .mpesa-hub-brand {
   display: flex;
   align-items: center;
-  gap: 12px;
-  flex-wrap: wrap;
+  gap: 10px;
 }
 
 .mpesa-hub-brand .mpesa-logo {
-  font-size: 1.6rem;
+  font-size: 1.35rem;
 }
 
 .mpesa-hub-badge {
   display: inline-flex;
   align-items: center;
-  padding: 4px 10px;
+  padding: 3px 8px;
   background: rgba(46, 125, 50, 0.12);
   border: 1px solid rgba(46, 125, 50, 0.3);
   border-radius: 999px;
   color: #2e7d32;
-  font-size: 0.7rem;
+  font-size: 0.66rem;
   font-weight: 800;
-  letter-spacing: 0.08em;
+  letter-spacing: 0.06em;
 }
 
-.mpesa-hub-intro {
-  margin: 0;
-  color: var(--muted, #645a50);
-  font-size: 0.95rem;
-  line-height: 1.55;
-  max-width: 640px;
+.mpesa-hub-subtitle {
+  font-size: 0.76rem;
+  font-weight: 700;
+  color: #7b6d5f;
+  letter-spacing: 0.02em;
 }
 
 .mpesa-hub-tabs {
   display: flex;
   align-items: center;
-  gap: 8px;
+  gap: 6px;
   flex-wrap: wrap;
-  border-bottom: 1px solid var(--line, #e6dcce);
-  padding-bottom: 12px;
+  border-bottom: 1px solid rgba(223, 184, 106, 0.25);
+  padding-bottom: 10px;
 }
 
 .mpesa-hub-tab {
-  padding: 7px 14px;
+  padding: 5px 11px;
   border-radius: 999px;
   border: 1px solid var(--line, #e6dcce);
   background: transparent;
   color: var(--ink-soft, #2d2620);
-  font-size: 0.82rem;
+  font-size: 0.78rem;
   font-weight: 650;
   cursor: pointer;
-  transition: all 180ms ease;
+  transition: all 160ms ease;
 }
 
 .mpesa-hub-tab:hover {
@@ -242,19 +243,19 @@
 
 .mpesa-hub-lockup {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
-  gap: 16px;
+  grid-template-columns: 1fr 1.2fr;
+  gap: 12px;
 }
 
 .mpesa-hub-box {
-  background: rgba(251, 248, 242, 0.7);
-  border: 1px solid var(--line, #e6dcce);
-  border-radius: 16px;
-  padding: 18px 20px;
+  background: rgba(251, 248, 242, 0.8);
+  border: 1px solid rgba(223, 184, 106, 0.35);
+  border-radius: 12px;
+  padding: 12px 14px;
   display: flex;
   flex-direction: column;
-  gap: 4px;
-  transition: border-color 200ms ease;
+  gap: 3px;
+  transition: border-color 180ms ease;
 }
 
 .mpesa-hub-box:hover {
@@ -262,43 +263,44 @@
 }
 
 .mpesa-hub-label {
-  font-size: 0.72rem;
+  font-size: 0.68rem;
   font-weight: 800;
-  letter-spacing: 0.1em;
-  color: var(--muted, #645a50);
+  letter-spacing: 0.08em;
+  color: #7b6d5f;
 }
 
 .mpesa-hub-value-row {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  gap: 12px;
-  margin: 4px 0;
+  gap: 8px;
+  margin: 2px 0;
 }
 
 .mpesa-hub-value {
   font-family: var(--font-serif);
-  font-size: clamp(1.25rem, 2.6vw, 1.6rem);
+  font-size: 1.25rem;
   font-weight: 700;
   color: var(--forest-deep, #0b231a);
   letter-spacing: 0.02em;
-  word-break: break-word;
+  word-break: break-all;
 }
 
 .mpesa-copy-btn {
   display: inline-flex;
   align-items: center;
-  gap: 6px;
-  padding: 6px 12px;
+  gap: 5px;
+  padding: 5px 9px;
   background: var(--surface, #ffffff);
   border: 1px solid rgba(212, 175, 55, 0.5);
-  border-radius: 8px;
+  border-radius: 7px;
   color: var(--forest, #143829);
-  font-size: 0.78rem;
+  font-size: 0.72rem;
   font-weight: 700;
   cursor: pointer;
   white-space: nowrap;
-  transition: all 180ms ease;
+  transition: all 160ms ease;
+  flex-shrink: 0;
 }
 
 .mpesa-copy-btn:hover {
@@ -307,34 +309,34 @@
 }
 
 .mpesa-hub-sub {
-  font-size: 0.82rem;
-  color: var(--muted, #645a50);
+  font-size: 0.74rem;
+  color: #7a6e62;
+  line-height: 1.35;
 }
 
 .mpesa-ledger-guide {
   display: flex;
-  align-items: flex-start;
-  gap: 10px;
-  padding: 12px 16px;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 12px;
   background: rgba(20, 56, 41, 0.04);
-  border: 1px solid rgba(223, 184, 106, 0.35);
+  border: 1px solid rgba(223, 184, 106, 0.3);
   border-left: 3px solid var(--forest);
-  border-radius: 10px;
-  font-size: 0.82rem;
+  border-radius: 8px;
+  font-size: 0.76rem;
   color: var(--forest-deep);
-  line-height: 1.5;
+  line-height: 1.4;
 }
 
 .mpesa-ledger-guide i {
   color: var(--forest);
-  font-size: 0.95rem;
-  margin-top: 2px;
+  font-size: 0.85rem;
   flex-shrink: 0;
 }
 
 .mpesa-ledger-guide code {
   background: rgba(20, 56, 41, 0.08);
-  padding: 2px 5px;
+  padding: 1px 4px;
   border-radius: 4px;
   font-weight: 750;
   color: var(--forest-deep);
@@ -345,4 +347,14 @@
   font-size: clamp(1rem, 2vw, 1.25rem) !important;
   word-break: break-all;
 }
+
+@media (max-width: 640px) {
+  .mpesa-hub {
+    padding: 16px;
+  }
+  .mpesa-hub-lockup {
+    grid-template-columns: 1fr;
+  }
+}
+
 

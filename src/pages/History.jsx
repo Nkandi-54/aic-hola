@@ -20,10 +20,10 @@ const milestones = [
   },
   {
     year: "1980",
-    era: "SANCTUARY DEDICATION",
+    era: "CHURCH DEDICATION",
     title: "First Permanent Church Home",
     description:
-      "Through sacrificial giving, fellowship, and community labour, the first permanent sanctuary in Hola was consecrated for worship, Sunday School, and biblical instruction.",
+      "Through sacrificial giving, fellowship, and community labour, the first permanent church building in Hola was consecrated for worship, Sunday School, and biblical instruction.",
     scripture: 'Psalm 84:1 · "How lovely is your dwelling place, Lord Almighty!"',
     image: "/gallery/20260502_134933.jpg",
     imageCaption: "AIC Hola compound gateway bearing church motto",
@@ -48,18 +48,18 @@ const milestones = [
   },
   {
     year: "2015",
-    era: "SANCTUARY EXPANSION",
-    title: "Modern Cathedral Sanctuary",
+    era: "CHURCH EXPANSION",
+    title: "Modern Cathedral Church",
     description:
-      "The congregation broke ground and dedicated our high-capacity modern sanctuary, equipped for multi-service worship, conference gatherings, and regional fellowships.",
+      "The congregation broke ground and dedicated our high-capacity modern church building, equipped for multi-service worship, conference gatherings, and regional fellowships.",
     scripture: 'Haggai 2:9 · "The glory of this present house will be greater than the glory of the former house, says the Lord Almighty."',
     image: "/gallery/20250608_115335.jpg",
-    imageCaption: "Modern cathedral sanctuary pulpit and hall",
+    imageCaption: "Modern cathedral church pulpit and hall",
   },
   {
     year: "2025+",
     era: "GOLDEN JUBILEE & BEYOND",
-    title: "50 Years of Grace & Digital Sanctuary",
+    title: "50 Years of Grace & Digital Church",
     description:
       "Celebrating a half-century of uncompromised biblical exposition in Hola (1975–2025), launching live broadcasts and digital fellowship to connect worshippers everywhere.",
     scripture: 'Hebrews 13:8 · "Jesus Christ is the same yesterday and today and forever."',
@@ -75,7 +75,7 @@ export default function History() {
         <span className="eyebrow">Church Heritage &amp; Roots</span>
         <h1>Rooted in faith, growing in grace.</h1>
         <p>
-          The living testimony of God’s faithfulness in Hola — from pioneer fellowship gatherings in 1975 along the Tana River to a modern cathedral sanctuary.
+          The living testimony of God’s faithfulness in Hola — from pioneer fellowship gatherings in 1975 along the Tana River to a modern cathedral church.
         </p>
       </header>
 
@@ -104,7 +104,7 @@ export default function History() {
             alt="Aerial perspective of AIC Hola Church compound and grounds"
             loading="lazy"
           />
-          <span className="history-photo-caption">AIC Hola Sanctuary &amp; Compound Grounds</span>
+          <span className="history-photo-caption">AIC Hola Church &amp; Compound Grounds</span>
         </div>
         <div className="history-photo-frame">
           <img
@@ -117,10 +117,10 @@ export default function History() {
         <div className="history-photo-frame">
           <img
             src="/gallery/20250608_115335.jpg"
-            alt="Sanctuary pulpit at AIC Hola"
+            alt="Church pulpit at AIC Hola"
             loading="lazy"
           />
-          <span className="history-photo-caption">Sanctuary Pulpit · Expository Ministry</span>
+          <span className="history-photo-caption">Church Pulpit · Expository Ministry</span>
         </div>
       </section>
 

@@ -18,7 +18,7 @@ const audioSourceFor = (track) =>
 const orderOfService = [
   { item: "Call to Worship & Opening Praise", scripture: "Psalm 100:1–5", leader: "Worship Leader & Choirs" },
   { item: "Opening Prayer & Thanksgiving", scripture: "1 Thessalonians 5:16–18", leader: "Assisting Minister" },
-  { item: "Sacred Choral Anthems & Hymns", scripture: "Colossians 3:16", leader: "Sanctuary / Youth Choir" },
+  { item: "Sacred Choral Anthems & Hymns", scripture: "Colossians 3:16", leader: "Church / Youth Choir" },
   { item: "Pastoral Scripture Reading", scripture: "Expository Sunday Passage", leader: "Church Elder / Reader" },
   { item: "Congregational Pastoral Prayer", scripture: "Philippians 4:6–7", leader: "Senior Pastor / Minister" },
   { item: "Offertory & Tithes Dedication", scripture: "2 Corinthians 9:7", leader: "Church Treasurer" },
@@ -167,7 +167,7 @@ export default function Live() {
   return (
     <div className="page-shell live-page">
       <header className="page-heading">
-        <span className="eyebrow">Digital Sanctuary &bull; Stream Online</span>
+        <span className="eyebrow">Digital Church &bull; Stream Online</span>
         <h1>Worship with Us from Anywhere.</h1>
         <p>
           {isLiveVideo
@@ -189,7 +189,7 @@ export default function Live() {
                 <span className="live-off-dot" aria-hidden="true" /> SUNDAY RECORDINGS ARCHIVE
               </span>
             )}
-            <h2>{isLiveVideo ? broadcast.title || "Sunday Worship Service" : "Recent Sanctuary Gatherings"}</h2>
+            <h2>{isLiveVideo ? broadcast.title || "Sunday Worship Service" : "Recent Church Gatherings"}</h2>
             {isLiveVideo && broadcast?.announcement ? (
               <p className="live-announcement-lead">
                 {broadcast.announcement}
@@ -228,7 +228,7 @@ export default function Live() {
         {liveSource && (
           <div className="live-inline-audio">
             <div className="live-inline-audio-tag">
-              <span className="live-pulse" /> Live Sanctuary Audio Feed
+              <span className="live-pulse" /> Live Church Audio Feed
             </div>
             <AudioPlayer src={liveSource} title={liveTrack.title} subtitle={liveTrack.speaker} autoPlay isLive />
           </div>
@@ -240,7 +240,7 @@ export default function Live() {
         <section className="live-countdown-banner">
           <div className="countdown-info">
             <span className="countdown-eyebrow">NEXT WORSHIP BROADCAST</span>
-            <h3>Sunday Divine Service &bull; Hola Sanctuary</h3>
+            <h3>Sunday Divine Service &bull; Hola Church</h3>
             <p>1st Service (Swahili) 8:30 AM &bull; 2nd Service (English) 10:45 AM</p>
           </div>
           <div className="countdown-timer-display" aria-label="Time until next service">
@@ -371,7 +371,7 @@ export default function Live() {
       <section className="live-note">
         <i className="fa-solid fa-bell" aria-hidden="true" />
         <div>
-          <h2>Never Miss a Sanctuary Broadcast</h2>
+          <h2>Never Miss a Church Broadcast</h2>
           <p>Enable browser notifications to be alerted whenever AIC Hola goes live, or subscribe on YouTube.</p>
         </div>
         <div className="live-note-actions">

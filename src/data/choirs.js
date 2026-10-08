@@ -1,14 +1,14 @@
 const choirs = [
   {
     slug: "main",
-    name: "Main Sanctuary Choir",
+    name: "Main Church Choir",
     description:
       "The flagship worship choir of AIC Hola, leading the congregation in sacred choral praise, traditional hymns, and anthems.",
     focus: "Sunday morning services",
     image: "/gallery/20250817_164248.jpg",
     media: [
       {
-        title: "Sunday Sanctuary Praise",
+        title: "Sunday Church Praise",
         description: "Leading the congregation in worship.",
         type: "video",
         url: "https://www.youtube.com/@nkandi242",
@@ -45,7 +45,7 @@ const choirs = [
     slug: "essence",
     name: "Essence Choir",
     description:
-      "A soulful worship choir filling the sanctuary with spirit-led praise, reflective hymns, and heartfelt devotion.",
+      "A soulful worship choir filling the church with spirit-led praise, reflective hymns, and heartfelt devotion.",
     focus: "Choral worship & special services",
     image: "/gallery/20250817_165759.jpg",
     media: [

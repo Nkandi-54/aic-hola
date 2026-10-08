@@ -8,18 +8,38 @@
  * - Wednesday Midweek Fellowship & Prayer: 5:00 PM – 6:30 PM
  */
 
+/**
+ * Checks if current time is within the weekend countdown window:
+ * Starts at midday on Fridays (12:00 PM) all through the weekend (Sunday 11:59:59 PM).
+ */
+export function isWeekendCountdownActive(date = new Date()) {
+  const day = date.getDay(); // 0 is Sunday, 5 is Friday, 6 is Saturday
+  const minutes = date.getHours() * 60 + date.getMinutes();
+
+  // Friday starting at midday (12:00 PM = 720 minutes)
+  if (day === 5 && minutes >= 720) return true;
+  // All day Saturday
+  if (day === 6) return true;
+  // All day Sunday
+  if (day === 0) return true;
+
+  return false;
+}
+
 export function getNextServiceInfo() {
   const now = new Date();
   const day = now.getDay(); // 0 is Sunday, 1 Monday, ..., 3 Wednesday, 6 Saturday
   const currentHour = now.getHours();
   const currentMinute = now.getMinutes();
   const timeInMinutes = currentHour * 60 + currentMinute;
+  const shouldShowCountdown = isWeekendCountdownActive(now);
 
   // 1. Check if a service is live right now
   // Sunday live window: 8:30 AM (510 min) to 12:45 PM (765 min)
   if (day === 0 && timeInMinutes >= 510 && timeInMinutes <= 765) {
     return {
       isLiveNow: true,
+      shouldShowCountdown,
       serviceName: "Sunday Divine Service &bull; In Session",
       badge: "LIVE NOW",
       targetTime: null,
@@ -31,6 +51,7 @@ export function getNextServiceInfo() {
   if (day === 3 && timeInMinutes >= 1020 && timeInMinutes <= 1110) {
     return {
       isLiveNow: true,
+      shouldShowCountdown,
       serviceName: "Wednesday Midweek Prayer &bull; In Session",
       badge: "LIVE NOW",
       targetTime: null,
@@ -82,6 +103,7 @@ export function getNextServiceInfo() {
 
   return {
     isLiveNow: false,
+    shouldShowCountdown,
     serviceName: isSundayNext
       ? "Sunday Gathering: Swahili 8:30 AM &bull; English 10:45 AM"
       : "Midweek Gathering: Wednesday 5:00 PM",
@@ -90,4 +112,3 @@ export function getNextServiceInfo() {
     timeRemaining: { days, hours, minutes, seconds },
   };
 }
-

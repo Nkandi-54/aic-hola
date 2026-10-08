@@ -11,7 +11,7 @@ const baselineEvents = [
     description: "Morning worship service, choir ministry, prayer, and expository sermon in Swahili.",
     department: "Sunday Worship",
     time_display: "Every Sunday · 8:30 AM – 10:15 AM",
-    location: "Main Sanctuary",
+    location: "Main Church",
     category: "Sunday Worship",
     badge: "Weekly Gathering",
     accent: "#dfb86a",
@@ -23,7 +23,7 @@ const baselineEvents = [
     description: "Family worship service, choral praise, and expository sermon in English.",
     department: "Sunday Worship",
     time_display: "Every Sunday · 10:45 AM – 12:30 PM",
-    location: "Main Sanctuary",
+    location: "Main Church",
     category: "Sunday Worship",
     badge: "Weekly Gathering",
     accent: "#143829",
@@ -59,7 +59,7 @@ const baselineEvents = [
     description: "Congregational prayer meeting standing in the gap for families, the town of Hola, and our nation.",
     department: "Pastoral Team",
     time_display: "Wednesdays · 5:00 PM – 6:30 PM",
-    location: "Sanctuary Prayer Hall",
+    location: "Church Prayer Hall",
     category: "Prayer & Intercession",
     badge: "Congregational Prayer",
     accent: "#9c4125",
@@ -67,11 +67,11 @@ const baselineEvents = [
   },
   {
     id: "base-6",
-    title: "Sanctuary & Youth Choir Rehearsals",
+    title: "Church & Youth Choir Rehearsals",
     description: "Weekly voice training, music rehearsal, and devotional preparation for Sunday services.",
     department: "Choir Ministry",
     time_display: "Fridays & Saturdays · 4:30 PM",
-    location: "Sanctuary Choir Stall",
+    location: "Church Choir Stall",
     category: "Choir Ministry",
     badge: "Worship Teams",
     accent: "#d4af37",
@@ -83,7 +83,7 @@ const baselineEvents = [
     description: "All-night prayer vigil, spiritual breakthrough, and worship for the entire congregation.",
     department: "Pastoral Team",
     time_display: "Last Friday of the Month · 9:00 PM – 5:00 AM",
-    location: "Main Sanctuary",
+    location: "Main Church",
     category: "Prayer & Intercession",
     badge: "Monthly Vigil",
     accent: "#b9c8e8",
@@ -141,7 +141,7 @@ function MediaVideoPlayer({ url, title }) {
 function getGoogleCalendarUrl(event) {
   const title = encodeURIComponent(event.title);
   const details = encodeURIComponent(event.description || "AIC Hola Gathering");
-  const location = encodeURIComponent(`${event.location || "Main Sanctuary"}, AIC Hola Church, Tana River County`);
+  const location = encodeURIComponent(`${event.location || "Main Church"}, AIC Hola Church, Tana River County`);
   return `https://calendar.google.com/calendar/render?action=TEMPLATE&text=${title}&details=${details}&location=${location}`;
 }
 
@@ -288,7 +288,7 @@ export default function Calendar() {
           <div>
             <h3>Planning a Dedication, Wedding, or Ministry Fellowship?</h3>
             <p>
-              AIC Hola church sanctuary and fellowship halls are available for sacred church rites and member gatherings. Contact the church office for scheduling and pastoral arrangements.
+              AIC Hola church halls and fellowship grounds are available for sacred church rites and member gatherings. Contact the church office for scheduling and pastoral arrangements.
             </p>
           </div>
         </div>

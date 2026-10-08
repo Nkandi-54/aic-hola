@@ -19,7 +19,7 @@ function Footer() {
             </div>
           </div>
           <p className="footer-vision">
-            A sanctuary rooted in Christ, proclaiming truth, nurturing fellowship, and serving Tana River County and beyond.
+            A church rooted in Christ, proclaiming truth, nurturing fellowship, and serving Tana River County and beyond.
           </p>
           <a
             href="https://maps.google.com/?q=AIC+Hola+Church"
@@ -34,7 +34,7 @@ function Footer() {
 
         <div className="footer-column footer-schedule-col">
           <h3 className="footer-heading">
-            <span className="footer-gold-dot" /> Sanctuary Services
+            <span className="footer-gold-dot" /> Church Services
           </h3>
           <ul className="footer-services-list">
             <li>

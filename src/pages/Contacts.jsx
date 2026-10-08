@@ -8,7 +8,7 @@ const contactInfo = {
   phone: "+254 727 175 730",
   altPhone: "+254 700 000 000",
   postal: "P.O. Box 24 – 70101, Hola, Kenya",
-  location: "AIC Hola Church Sanctuary, Hola Town, Tana River County, Kenya",
+  location: "AIC Hola Church, Hola Town, Tana River County, Kenya",
   maps: "https://maps.google.com/?q=AIC+Hola+Church",
   landmarks: "Centrally located in Hola Town, adjacent to Hola Primary & near County Administrative Offices.",
 };
@@ -16,7 +16,7 @@ const contactInfo = {
 const officeHours = [
   { days: "Monday – Friday", hours: "8:00 AM – 5:00 PM", note: "Pastoral & Church Office" },
   { days: "Saturdays", hours: "9:00 AM – 4:00 PM", note: "Ministry Counseling & Rehearsals" },
-  { days: "Sundays", hours: "7:30 AM – 1:30 PM", note: "Sanctuary Gatherings" },
+  { days: "Sundays", hours: "7:30 AM – 1:30 PM", note: "Church Gatherings" },
 ];
 
 export default function Contacts() {
@@ -68,7 +68,7 @@ export default function Contacts() {
       <header className="page-heading">
         <span className="eyebrow">Pastoral Care &amp; Office Inquiries</span>
         <h1>We are here for you.</h1>
-        <p>Reach out for prayer, pastoral counseling, directions to our sanctuary, or church office inquiries.</p>
+        <p>Reach out for prayer, pastoral counseling, directions to our church, or church office inquiries.</p>
       </header>
 
       {/* Main Grid: Details Aside + Interactive Contact Card */}
@@ -98,7 +98,7 @@ export default function Contacts() {
             <a href={contactInfo.maps} target="_blank" rel="noopener noreferrer">
               <i className="fa-solid fa-location-dot" aria-hidden="true" />
               <span>
-                <strong>Sanctuary Location</strong>
+                <strong>Church Location</strong>
                 <small>Hola, Tana River County</small>
               </span>
             </a>
@@ -270,7 +270,7 @@ export default function Contacts() {
           <div className="info-card-icon" aria-hidden="true">
             <i className="fa-solid fa-compass" />
           </div>
-          <h3>Sanctuary Directions</h3>
+          <h3>Church Directions</h3>
           <p className="landmark-text">{contactInfo.landmarks}</p>
           <div className="landmark-address-pill">
             <i className="fa-solid fa-location-pin" aria-hidden="true" />
@@ -287,13 +287,13 @@ export default function Contacts() {
         </div>
       </section>
 
-      {/* Interactive Sanctuary Compound Map & GPS Guide */}
-      <section className="contact-map-section" aria-label="Interactive Sanctuary Map">
+      {/* Interactive Church Compound Map & GPS Guide */}
+      <section className="contact-map-section" aria-label="Interactive Church Map">
         <div className="contact-map-card">
           <div className="contact-map-header">
             <div>
               <span className="contact-map-kicker">Interactive Compound Guide</span>
-              <h3 className="contact-map-title">Sanctuary Location & Campus Map</h3>
+              <h3 className="contact-map-title">Church Location & Campus Map</h3>
               <p className="contact-map-desc">
                 Centrally located in Hola Town, Tana River County. Secure perimeter parking and barrier-free access available for all worshippers.
               </p>
@@ -321,7 +321,7 @@ export default function Contacts() {
             <div className="contact-map-badge">
               <i className="fa-solid fa-church" aria-hidden="true" />
               <div>
-                <strong>AIC Hola Main Sanctuary</strong>
+                <strong>AIC Hola Main Church</strong>
                 <span>Hola Town Centre · Tana River County</span>
               </div>
             </div>
@@ -343,7 +343,7 @@ export default function Contacts() {
               </div>
               <div>
                 <strong>Accessibility & Ramps</strong>
-                <p>Step-free sanctuary doors, paved rampways, and reserved front seating for seniors.</p>
+                <p>Step-free church doors, paved rampways, and reserved front seating for seniors.</p>
               </div>
             </div>
             <div className="map-feature-item">

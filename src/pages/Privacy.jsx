@@ -28,7 +28,7 @@ function Privacy() {
           <h2>
             <span className="section-num">01</span> Information We Collect
           </h2>
-          <p>We collect only the minimum personal information required to facilitate sanctuary fellowship and administrative communication:</p>
+          <p>We collect only the minimum personal information required to facilitate church fellowship and administrative communication:</p>
           <ul>
             <li><strong>Account Credentials:</strong> Full name and email address when you register an account. Passwords are salted, hashed, and managed through Supabase Auth.</li>
             <li><strong>Fellowship Communications:</strong> Private direct messages exchanged between verified members to support pastoral dialogue and departmental meetings.</li>
@@ -44,7 +44,7 @@ function Privacy() {
           <p>All data collected is used strictly for church ministry operations:</p>
           <ul>
             <li>Delivering weekly bulletins, departmental plans, and pastoral communiqués.</li>
-            <li>Alerting members to live-streamed Sunday sanctuary worship services when requested.</li>
+            <li>Alerting members to live-streamed Sunday church worship services when requested.</li>
             <li>Enabling verified members to message each other in a safe, moderated community environment.</li>
             <li>We do not sell, rent, monetize, or disclose your personal data to third-party advertisers or data brokers.</li>
           </ul>
@@ -90,7 +90,7 @@ function Privacy() {
             <span className="section-num">05</span> Voluntary Tithes & Apple Guideline 3.2.2(iv) Disclosure
           </h2>
           <p>
-            Voluntary religious tithes, offerings, and donations given through Lipa na M-PESA directly support the ministry, local community charity, and maintenance of the AIC Hola sanctuary. Contributions are entirely voluntary and do not unlock digital content, digital goods, or software features.
+            Voluntary religious tithes, offerings, and donations given through Lipa na M-PESA directly support the ministry, local community charity, and maintenance of the AIC Hola church. Contributions are entirely voluntary and do not unlock digital content, digital goods, or software features.
           </p>
         </section>
 
@@ -101,7 +101,7 @@ function Privacy() {
           <p>For questions regarding this policy or to exercise your data protection rights under Kenyan law:</p>
           <div className="privacy-contact-card">
             <strong>Africa Inland Church (AIC) Hola</strong>
-            <p>Sanctuary Office, P.O. Box 24-70101, Hola, Tana River County, Kenya</p>
+            <p>Church Office, P.O. Box 24-70101, Hola, Tana River County, Kenya</p>
             <p>Email: <a href="mailto:support@aic-hola.org">support@aic-hola.org</a> · <a href="mailto:contacts@aichola.org">contacts@aichola.org</a></p>
             <p>Phone: <a href="tel:+254727175730">+254 727 175 730</a></p>
           </div>
@@ -109,7 +109,7 @@ function Privacy() {
 
         <div className="privacy-footer-action">
           <Link to="/" className="btn-primary">
-            Return to Sanctuary Home
+            Return to Church Home
           </Link>
           <Link to="/contacts" className="btn-secondary">
             Contact Church Office

@@ -42,7 +42,7 @@ export default function ChoirDetail() {
           <div className="choir-hero-gradient" />
           <div className="choir-hero-badge">
             <i className="fa-solid fa-microphone-lines" aria-hidden="true" />
-            <span>{choir.name} &bull; Hola Sanctuary</span>
+            <span>{choir.name} &bull; Hola Church</span>
           </div>
         </div>
       )}

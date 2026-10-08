@@ -101,9 +101,7 @@ export default function MpesaGiving({ variant = "card", className = "" }) {
             {wordmark}
             <span className="mpesa-hub-badge">LIPA NA M-PESA</span>
           </div>
-          <p className="mpesa-hub-intro">
-            Support worship, outreach, and development through Equity Paybill <strong>247247</strong>. Use the standard Kenyan ledger format <code>802200#TITHE</code> or <code>802200#OFFERING</code> to route your gift directly to the right fund.
-          </p>
+          <span className="mpesa-hub-subtitle">Official Church Paybill &bull; Equity Bank</span>
         </div>
 
         {/* Giving Category Selector */}
@@ -135,14 +133,14 @@ export default function MpesaGiving({ variant = "card", className = "" }) {
                 onClick={() => copyToClipboard("247247", "paybill")}
               >
                 <i className={`fa-solid ${copiedField === "paybill" ? "fa-check" : "fa-copy"}`} aria-hidden="true" />
-                <span>{copiedField === "paybill" ? "Copied!" : "Copy"}</span>
+                <span>{copiedField === "paybill" ? "Copied" : "Copy"}</span>
               </button>
             </div>
             <span className="mpesa-hub-sub">Equity Bank</span>
           </div>
 
           <div className="mpesa-hub-box">
-            <span className="mpesa-hub-label">ACCOUNT NUMBER ({current.label.toUpperCase()})</span>
+            <span className="mpesa-hub-label">ACCOUNT ({current.label.toUpperCase()})</span>
             <div className="mpesa-hub-value-row">
               <strong className="mpesa-hub-value">{current.account}</strong>
               <button
@@ -152,7 +150,7 @@ export default function MpesaGiving({ variant = "card", className = "" }) {
                 onClick={() => copyToClipboard(current.account, "account")}
               >
                 <i className={`fa-solid ${copiedField === "account" ? "fa-check" : "fa-copy"}`} aria-hidden="true" />
-                <span>{copiedField === "account" ? "Copied!" : "Copy"}</span>
+                <span>{copiedField === "account" ? "Copied" : "Copy"}</span>
               </button>
             </div>
             <span className="mpesa-hub-sub">{current.note}</span>
@@ -162,14 +160,7 @@ export default function MpesaGiving({ variant = "card", className = "" }) {
         <div className="mpesa-ledger-guide">
           <i className="fa-solid fa-circle-info" aria-hidden="true" />
           <span>
-            <strong>Kenyan Church Ledger Tip:</strong> Entering <code>{current.account}</code> automatically reconciles your gift to the church&rsquo;s <strong>{current.purpose}</strong> bank sub-ledger. You can also append your name (e.g. <code>{current.account}#YOURNAME</code>).
-          </span>
-        </div>
-
-        <div className="mpesa-scripture-ribbon">
-          <i className="fa-solid fa-quote-left" aria-hidden="true" />
-          <span>
-            &ldquo;Each of you should give what you have decided in your heart to give, not reluctantly or under compulsion, for God loves a cheerful giver.&rdquo; &mdash; 2 Corinthians 9:7
+            Reconciles directly to church <strong>{current.purpose}</strong> ledger. Optional: append your name (e.g. <code>{current.account}#YourName</code>).
           </span>
         </div>
       </div>

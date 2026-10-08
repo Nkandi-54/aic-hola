@@ -11,7 +11,6 @@ const serviceSchedules = [
     time: "8:30 AM – 10:15 AM",
     title: "Swahili Service",
     desc: "Ibada, neno, sifa za kwaya, na maombi.",
-    location: "Main Sanctuary",
     icon: "fa-sun",
     audience: "Entire Congregation",
   },
@@ -20,7 +19,6 @@ const serviceSchedules = [
     time: "10:45 AM – 12:30 PM",
     title: "English Service",
     desc: "Preaching, choral praise, and fellowship.",
-    location: "Main Sanctuary",
     icon: "fa-church",
     audience: "Entire Congregation",
   },
@@ -29,7 +27,6 @@ const serviceSchedules = [
     time: "8:30 AM & 10:45 AM",
     title: "Sunday School",
     desc: "Bible lessons and praise for children.",
-    location: "Sunday School Hall",
     icon: "fa-children",
     audience: "Ages 3 – 12",
   },
@@ -38,7 +35,6 @@ const serviceSchedules = [
     time: "2:00 PM – 4:00 PM",
     title: "Youth Fellowship",
     desc: "Worship, Bible discussion, and mentorship.",
-    location: "Youth Center",
     icon: "fa-users-rays",
     audience: "Youth & Teens",
   },
@@ -47,7 +43,6 @@ const serviceSchedules = [
     time: "Wednesdays 5:00 PM – 6:30 PM",
     title: "Prayer Meeting",
     desc: "Congregational prayer and intercession.",
-    location: "Sanctuary",
     icon: "fa-hands-praying",
     audience: "All Believers",
   },
@@ -56,7 +51,6 @@ const serviceSchedules = [
     time: "Fridays & Saturdays 4:30 PM",
     title: "Choir Rehearsals",
     desc: "Praise preparation and music rehearsals.",
-    location: "Choir Stall",
     icon: "fa-music",
     audience: "Choirs & Teams",
   },
@@ -205,29 +199,31 @@ export default function Home() {
               <span>AIC HOLA &bull; EST. 1975 &bull; 50 YEARS OF FAITH</span>
             </div>
 
-            {/* Dynamic Next Service Live Countdown Badge */}
-            <div className={`hero-service-ticker ${serviceInfo.isLiveNow ? "live-pulse-active" : ""}`}>
-              <span className="ticker-beacon" aria-hidden="true">
-                <span className="beacon-dot" />
-              </span>
-              <span className="ticker-badge">{serviceInfo.badge}</span>
-              <span className="ticker-divider" aria-hidden="true">&bull;</span>
-              {serviceInfo.isLiveNow ? (
-                <Link to="/live" className="ticker-live-link">
-                  <strong>Service in Session</strong> &mdash; Watch Live Broadcast <i className="fa-solid fa-arrow-right" />
-                </Link>
-              ) : (
-                <span className="ticker-countdown">
-                  Starts in{" "}
-                  {serviceInfo.timeRemaining.days > 0 && (
-                    <strong>{serviceInfo.timeRemaining.days}d </strong>
-                  )}
-                  <strong>{serviceInfo.timeRemaining.hours}h </strong>
-                  <strong>{serviceInfo.timeRemaining.minutes}m </strong>
-                  <strong>{serviceInfo.timeRemaining.seconds}s</strong>
+            {/* Dynamic Next Service Live Countdown Badge - visible Friday midday through weekend */}
+            {serviceInfo.shouldShowCountdown && (
+              <div className={`hero-service-ticker ${serviceInfo.isLiveNow ? "live-pulse-active" : ""}`}>
+                <span className="ticker-beacon" aria-hidden="true">
+                  <span className="beacon-dot" />
                 </span>
-              )}
-            </div>
+                <span className="ticker-badge">{serviceInfo.badge}</span>
+                <span className="ticker-divider" aria-hidden="true">&bull;</span>
+                {serviceInfo.isLiveNow ? (
+                  <Link to="/live" className="ticker-live-link">
+                    <strong>Service in Session</strong> &mdash; Watch Live Broadcast <i className="fa-solid fa-arrow-right" />
+                  </Link>
+                ) : (
+                  <span className="ticker-countdown">
+                    Starts in{" "}
+                    {serviceInfo.timeRemaining.days > 0 && (
+                      <strong>{serviceInfo.timeRemaining.days}d </strong>
+                    )}
+                    <strong>{serviceInfo.timeRemaining.hours}h </strong>
+                    <strong>{serviceInfo.timeRemaining.minutes}m </strong>
+                    <strong>{serviceInfo.timeRemaining.seconds}s</strong>
+                  </span>
+                )}
+              </div>
+            )}
 
             <h1 className="hero-title">
               Where the Bible speaks, <br />
@@ -235,7 +231,7 @@ export default function Home() {
             </h1>
 
             <p className="hero-lead">
-              A sanctuary of biblical preaching, choral praise, and Christian fellowship in Tana River County. Celebrating 50 years of God’s grace in Hola.
+              A church of biblical preaching, choral praise, and Christian fellowship in Tana River County. Celebrating 50 years of God’s grace in Hola.
             </p>
 
             <div className="hero-actions">
@@ -270,18 +266,18 @@ export default function Home() {
               <div className="hero-photo-wrap">
                 <img
                   src="/gallery/20250817_164248.jpg"
-                  alt="AIC Hola sanctuary choir"
+                  alt="AIC Hola church choir"
                   className="hero-photo-img"
                   loading="eager"
                 />
                 <div className="hero-photo-gradient" />
                 <span className="hero-photo-tag">
                   <i className="fa-solid fa-church" aria-hidden="true" />
-                  Sanctuary Praise
+                  Church Praise
                 </span>
                 <div className="hero-photo-caption">
-                  <strong>AIC Hola Sanctuary Choir</strong>
-                  <span>Sunday Worship &bull; Hola Sanctuary</span>
+                  <strong>AIC Hola Church Choir</strong>
+                  <span>Sunday Worship &bull; Hola Church</span>
                 </div>
               </div>
             </div>
@@ -391,14 +387,6 @@ export default function Home() {
               </div>
               <h3 className="schedule-title">{svc.title}</h3>
               <p className="schedule-desc">{svc.desc}</p>
-              <div className="schedule-card-footer">
-                <span className="schedule-location">
-                  <i className="fa-solid fa-location-dot" aria-hidden="true" /> {svc.location}
-                </span>
-                <Link to="/contacts" className="schedule-card-link" title="Directions">
-                  Directions <i className="fa-solid fa-chevron-right" aria-hidden="true" />
-                </Link>
-              </div>
             </article>
           ))}
         </div>
@@ -493,18 +481,18 @@ export default function Home() {
         </div>
 
         <div className="choir-spotlight-grid">
-          <article className="choir-preview-card sanctuary-choir-card">
+          <article className="choir-preview-card main-choir-card">
             <div className="choir-preview-media">
               <img
                 src="/gallery/20250817_165759.jpg"
-                alt="Sanctuary Choir"
+                alt="Church Choir"
                 loading="lazy"
               />
-              <span className="choir-media-tag">Sanctuary Choir</span>
+              <span className="choir-media-tag">Church Choir</span>
             </div>
             <div className="choir-preview-body">
               <span className="choir-subhead">Hymns &amp; Anthems</span>
-              <h3>Sanctuary Choir</h3>
+              <h3>Church Choir</h3>
               <p>Leading the congregation with classic choral hymns and sacred multi-part harmonies.</p>
               <div className="choir-preview-actions">
                 <Link to="/choirs" className="button secondary sm">
@@ -669,7 +657,7 @@ export default function Home() {
                 <i className="fa-solid fa-hands-praying" aria-hidden="true" /> Request Prayer
               </button>
               <Link className="button secondary welcome-secondary-cta" to="/contacts">
-                <i className="fa-solid fa-location-dot" aria-hidden="true" /> Find the Sanctuary
+                <i className="fa-solid fa-location-dot" aria-hidden="true" /> Find the Church
               </Link>
             </div>
           </div>

@@ -5,10 +5,10 @@ import "./Gallery.css";
 const galleryCatalog = [
   {
     file: "20250817_164248.jpg",
-    title: "Sanctuary Choir in Reverent Worship",
+    title: "Church Choir in Reverent Worship",
     category: "Worship Choirs",
     date: "August 2025",
-    desc: "AIC Hola Sanctuary Choir ministering sacred hymns during Sunday divine service.",
+    desc: "AIC Hola Church Choir ministering sacred hymns during Sunday divine service.",
   },
   {
     file: "20250817_165759.jpg",
@@ -19,8 +19,8 @@ const galleryCatalog = [
   },
   {
     file: "20250608_115335.jpg",
-    title: "Sanctuary Pulpit Ministry",
-    category: "Sanctuary Praise",
+    title: "Church Pulpit Ministry",
+    category: "Church Praise",
     date: "June 2025",
     desc: "The sacred pulpit of AIC Hola where the Bible speaks and grace abounds.",
   },
@@ -33,7 +33,7 @@ const galleryCatalog = [
   },
   {
     file: "20251223_173751.jpg",
-    title: "Christmas Sanctuary Fellowship",
+    title: "Christmas Church Fellowship",
     category: "Fellowships",
     date: "December 2025",
     desc: "Congregation gathering for sacred Christmas carols and praise.",
@@ -41,9 +41,9 @@ const galleryCatalog = [
   {
     file: "20260104_132048.jpg",
     title: "New Year Dedication Service",
-    category: "Sanctuary Praise",
+    category: "Church Praise",
     date: "January 2026",
-    desc: "Starting the new year rooted in prayer and dedication at Hola sanctuary.",
+    desc: "Starting the new year rooted in prayer and dedication at Hola church.",
   },
   {
     file: "20260404_121843.jpg",
@@ -62,7 +62,7 @@ const galleryCatalog = [
   {
     file: "20260404_141723.jpg",
     title: "Congregational Praise",
-    category: "Sanctuary Praise",
+    category: "Church Praise",
     date: "April 2026",
     desc: "Hands lifted in sincere thanksgiving to the Almighty.",
   },
@@ -82,21 +82,21 @@ const galleryCatalog = [
   },
   {
     file: "20260423_155619.jpg",
-    title: "Sanctuary Compound & Grounds",
+    title: "Church Compound & Grounds",
     category: "Grounds & Gateway",
     date: "April 2026",
-    desc: "Aerial view of AIC Hola church compound and peaceful sanctuary grounds.",
+    desc: "Aerial view of AIC Hola church compound and peaceful church grounds.",
   },
   {
     file: "20260502_134732.jpg",
     title: "Main Church Compound Avenue",
     category: "Grounds & Gateway",
     date: "May 2026",
-    desc: "Welcoming driveway leading worshippers to the main sanctuary.",
+    desc: "Welcoming driveway leading worshippers to the main church.",
   },
   {
     file: "20260502_134823.jpg",
-    title: "Sanctuary Building Exterior",
+    title: "Church Building Exterior",
     category: "Grounds & Gateway",
     date: "May 2026",
     desc: "The cathedral building standing as a beacon in Hola, Tana River.",
@@ -112,7 +112,7 @@ const galleryCatalog = [
 
 const galleryCategories = [
   "All Photos",
-  "Sanctuary Praise",
+  "Church Praise",
   "Worship Choirs",
   "Grounds & Gateway",
   "Fellowships",
@@ -173,7 +173,7 @@ export default function Gallery() {
         <span className="eyebrow">Visual Heritage &bull; Church Life</span>
         <h1>Moments of Grace &amp; Fellowship.</h1>
         <p>
-          Photographic memories of sanctuary worship, sacred choral music, and fellowship at AIC Hola.
+          Photographic memories of church worship, sacred choral music, and fellowship at AIC Hola.
         </p>
       </header>
 
