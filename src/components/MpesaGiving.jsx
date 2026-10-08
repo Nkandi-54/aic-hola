@@ -61,10 +61,10 @@ export default function MpesaGiving({ variant = "card", className = "" }) {
         <div className="mpesa-hub-header">
           <div className="mpesa-hub-brand">
             {wordmark}
-            <span className="mpesa-hub-badge">LIPA NA M-PESA • SAFE &amp; SECURE</span>
+            <span className="mpesa-hub-badge">LIPA NA M-PESA</span>
           </div>
           <p className="mpesa-hub-intro">
-            Support the Gospel, sanctuary worship, community outreach, and church development in Hola.
+            Support ministry, community outreach, and church development in Hola.
           </p>
         </div>
 
@@ -100,7 +100,7 @@ export default function MpesaGiving({ variant = "card", className = "" }) {
                 <span>{copiedField === "paybill" ? "Copied!" : "Copy"}</span>
               </button>
             </div>
-            <span className="mpesa-hub-sub">Equity Bank Paybill Gateway</span>
+            <span className="mpesa-hub-sub">Equity Bank</span>
           </div>
 
           <div className="mpesa-hub-box">
