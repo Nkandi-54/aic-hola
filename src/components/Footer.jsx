@@ -39,7 +39,7 @@ function Footer() {
           <ul className="footer-services-list">
             <li>
               <span className="service-day">Sunday Service 1</span>
-              <span className="service-time">09:00 AM – 10:30 AM (Swahili)</span>
+              <span className="service-time">08:30 AM – 10:15 AM (Swahili)</span>
             </li>
             <li>
               <span className="service-day">Sunday Service 2</span>
@@ -50,15 +50,15 @@ function Footer() {
               <span className="service-time">05:00 PM – 06:30 PM (Prayer)</span>
             </li>
             <li>
-              <span className="service-day">Friday Fellowship</span>
-              <span className="service-time">05:00 PM (Youth & Ministries)</span>
+              <span className="service-day">Friday Rehearsals</span>
+              <span className="service-time">04:30 PM (Choir Ministries)</span>
             </li>
           </ul>
         </div>
 
         <div className="footer-column footer-giving-col">
           <h3 className="footer-heading">
-            <span className="footer-gold-dot" /> Tithes & Offerings
+            <span className="footer-gold-dot" /> Tithes &amp; Offerings
           </h3>
           <MpesaGiving variant="footer" className="footer-mpesa" />
 
@@ -84,7 +84,12 @@ function Footer() {
         <div className="footer-bottom">
           <p>© {new Date().getFullYear()} AIC Hola Church. All rights reserved.</p>
           <div className="footer-bottom-links">
-            <Link to="/privacy" className="footer-legal-link">Privacy &amp; Data Rights</Link>
+            <Link to="/history" className="footer-legal-link">History</Link>
+            <Link to="/calendar" className="footer-legal-link">Events</Link>
+            <Link to="/sermons" className="footer-legal-link">Sermons</Link>
+            <Link to="/choirs" className="footer-legal-link">Choirs</Link>
+            <Link to="/live" className="footer-legal-link">Live</Link>
+            <Link to="/privacy" className="footer-legal-link">Privacy</Link>
             <Link to="/account" className="footer-legal-link">Church Portal</Link>
           </div>
           <div className="footer-values-badge">

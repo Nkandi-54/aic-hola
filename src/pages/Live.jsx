@@ -1,6 +1,7 @@
 import React, { useCallback, useEffect, useRef, useState } from "react";
 import YouTubeEmbed from "../components/YouTubeEmbed";
 import AudioPlayer from "../components/AudioPlayer";
+import MpesaGiving from "../components/MpesaGiving";
 import { isSupabaseConfigured, supabase } from "../lib/supabase";
 import "./Live.css";
 
@@ -14,12 +15,66 @@ const publicUrl = (path) =>
 const audioSourceFor = (track) =>
   track?.stream_url || (track?.storage_path ? publicUrl(track.storage_path) : "");
 
+const orderOfService = [
+  { item: "Call to Worship & Opening Praise", scripture: "Psalm 100:1–5", leader: "Worship Leader & Choirs" },
+  { item: "Opening Prayer & Thanksgiving", scripture: "1 Thessalonians 5:16–18", leader: "Assisting Minister" },
+  { item: "Sacred Choral Anthems & Hymns", scripture: "Colossians 3:16", leader: "Sanctuary / Youth Choir" },
+  { item: "Pastoral Scripture Reading", scripture: "Expository Sunday Passage", leader: "Church Elder / Reader" },
+  { item: "Congregational Pastoral Prayer", scripture: "Philippians 4:6–7", leader: "Senior Pastor / Minister" },
+  { item: "Offertory & Tithes Dedication", scripture: "2 Corinthians 9:7", leader: "Church Treasurer" },
+  { item: "The Word of God (Expository Sermon)", scripture: "Scripture of the Day", leader: "Pulpit Preacher" },
+  { item: "Closing Hymn & Benediction", scripture: "Numbers 6:24–26", leader: "Presiding Pastor" },
+];
+
+function getNextServiceTime() {
+  const now = new Date();
+  const day = now.getDay(); // 0 is Sunday, 3 is Wednesday
+  const target = new Date(now);
+
+  if (day === 0) {
+    // Sunday: Check 8:30 AM or 10:45 AM
+    const service1 = new Date(now);
+    service1.setHours(8, 30, 0, 0);
+    const service2 = new Date(now);
+    service2.setHours(10, 45, 0, 0);
+
+    if (now < service1) return service1;
+    if (now < service2) return service2;
+  }
+
+  // Next upcoming: Wednesday 5:00 PM or next Sunday 8:30 AM
+  const daysUntilSunday = (7 - day) % 7 || 7;
+  target.setDate(now.getDate() + daysUntilSunday);
+  target.setHours(8, 30, 0, 0);
+  return target;
+}
+
 export default function Live() {
   const [alertsEnabled, setAlertsEnabled] = useState(false);
   const [liveTrack, setLiveTrack] = useState(null);
   const [recordings, setRecordings] = useState([]);
   const [broadcast, setBroadcast] = useState(null);
+  const [activeTab, setActiveTab] = useState("bulletin");
+  const [timeRemaining, setTimeRemaining] = useState({ hours: 0, minutes: 0, seconds: 0 });
+  const [copiedLink, setCopiedLink] = useState(false);
   const latestId = useRef(null);
+
+  // Next service countdown ticker
+  useEffect(() => {
+    const updateCountdown = () => {
+      const nextTime = getNextServiceTime();
+      const diff = Math.max(0, nextTime - new Date());
+      const totalSeconds = Math.floor(diff / 1000);
+      const hours = Math.floor(totalSeconds / 3600);
+      const minutes = Math.floor((totalSeconds % 3600) / 60);
+      const seconds = totalSeconds % 60;
+      setTimeRemaining({ hours, minutes, seconds });
+    };
+
+    updateCountdown();
+    const timer = setInterval(updateCountdown, 1000);
+    return () => clearInterval(timer);
+  }, []);
 
   useEffect(() => {
     const checkForNewService = async () => {
@@ -32,7 +87,7 @@ export default function Live() {
         }
         if (id) latestId.current = id;
       } catch {
-        // The embedded playlist remains available if the optional alert feed is unavailable.
+        // Fallback silently if RSS is blocked by CORS
       }
     };
 
@@ -41,7 +96,6 @@ export default function Live() {
     return () => window.clearInterval(interval);
   }, [alertsEnabled]);
 
-  // Load worship audio and live broadcast switchboard settings
   const loadAudio = useCallback(async () => {
     if (!isSupabaseConfigured) return;
     const [audioRes, broadcastRes] = await Promise.all([
@@ -73,12 +127,10 @@ export default function Live() {
 
   useEffect(() => {
     void loadAudio();
-    // Poll for a broadcast starting or ending while the page is open.
     const interval = window.setInterval(loadAudio, 60_000);
     return () => window.clearInterval(interval);
   }, [loadAudio]);
 
-  // Real-time synchronization for instant go-live broadcasts
   useEffect(() => {
     if (!isSupabaseConfigured) return undefined;
     const channel = supabase
@@ -100,143 +152,241 @@ export default function Live() {
     setAlertsEnabled(permission === "granted");
   };
 
+  const handleShare = () => {
+    if (navigator?.clipboard?.writeText) {
+      navigator.clipboard.writeText(window.location.href).then(() => {
+        setCopiedLink(true);
+        setTimeout(() => setCopiedLink(false), 2500);
+      });
+    }
+  };
+
   const liveSource = audioSourceFor(liveTrack);
   const isLiveVideo = Boolean(broadcast?.is_live && broadcast?.youtube_video_id);
 
   return (
-    <div className="page-shell">
+    <div className="page-shell live-page">
       <header className="page-heading">
-        <span className="eyebrow">Worship from wherever you are</span>
-        <h1>Watch services and recent recordings.</h1>
+        <span className="eyebrow">Digital Sanctuary &bull; Stream Online</span>
+        <h1>Worship with Us from Anywhere.</h1>
         <p>
           {isLiveVideo
-            ? "We are broadcasting live now! Join our online sanctuary service in worship."
-            : "Join us online through our YouTube playlist. New services appear here as they are published."}
+            ? "We are broadcasting live now! Join our online congregation in reverent praise and Scripture."
+            : "Watch real-time live broadcasts during services or explore our complete catalogue of recent worship recordings."}
         </p>
       </header>
 
+      {/* Hero Stream Player Lockup */}
       <section className="live-player">
         <div className="live-player-header">
           <div>
             {isLiveVideo ? (
-              <span className="live-status" style={{ background: "#d63031", color: "#fff", borderColor: "#ff7675" }}>
+              <span className="live-status live-now-tag">
                 <span className="live-pulse" aria-hidden="true" /> BROADCASTING LIVE NOW
               </span>
             ) : (
-              <span className="live-status">
-                <span aria-hidden="true" /> ON YOUTUBE
+              <span className="live-status live-off-tag">
+                <span className="live-off-dot" aria-hidden="true" /> SUNDAY RECORDINGS ARCHIVE
               </span>
             )}
-            <h2>{isLiveVideo ? broadcast.title || "Sunday Worship Service" : "Recent services"}</h2>
+            <h2>{isLiveVideo ? broadcast.title || "Sunday Worship Service" : "Recent Sanctuary Gatherings"}</h2>
             {isLiveVideo && broadcast?.announcement ? (
-              <p style={{ margin: "6px 0 0", color: "var(--clay)", fontWeight: "600", fontSize: "0.95rem" }}>
+              <p className="live-announcement-lead">
                 {broadcast.announcement}
               </p>
             ) : null}
           </div>
-          {isLiveVideo ? (
+
+          <div className="live-player-actions">
+            <button
+              type="button"
+              className="live-share-btn"
+              onClick={handleShare}
+              title="Copy stream link to share"
+            >
+              <i className={`fa-solid ${copiedLink ? "fa-check" : "fa-share-nodes"}`} aria-hidden="true" />
+              <span>{copiedLink ? "Link Copied!" : "Share"}</span>
+            </button>
             <a
-              className="text-link"
-              href={`https://www.youtube.com/watch?v=${broadcast.youtube_video_id}`}
+              className="button gold sm"
+              href={isLiveVideo ? `https://www.youtube.com/watch?v=${broadcast.youtube_video_id}` : PLAYLIST_URL}
               target="_blank"
               rel="noopener noreferrer"
             >
-              Watch on YouTube <span aria-hidden="true">↗</span>
+              <i className="fa-brands fa-youtube" aria-hidden="true" /> Open YouTube
             </a>
-          ) : (
-            <a
-              className="text-link"
-              href={PLAYLIST_URL}
-              target="_blank"
-              rel="noopener noreferrer"
-            >
-              Open full playlist <span aria-hidden="true">↗</span>
-            </a>
-          )}
+          </div>
         </div>
+
         {isLiveVideo ? (
           <YouTubeEmbed videoId={broadcast.youtube_video_id} title={broadcast.title || "AIC Hola live service"} />
         ) : (
           <YouTubeEmbed playlistId={broadcast?.youtube_playlist_id || PLAYLIST_ID} title="AIC Hola recent services" />
         )}
+
+        {/* Live Audio Sync */}
+        {liveSource && (
+          <div className="live-inline-audio">
+            <div className="live-inline-audio-tag">
+              <span className="live-pulse" /> Live Sanctuary Audio Feed
+            </div>
+            <AudioPlayer src={liveSource} title={liveTrack.title} subtitle={liveTrack.speaker} autoPlay isLive />
+          </div>
+        )}
       </section>
 
-      {liveSource ? (
-        <section className="live-audio-section">
-          <div className="live-audio-heading">
-            <span className="live-status live-status-audio">
-              <span aria-hidden="true" /> LIVE AUDIO
-            </span>
-            <h2>Playing now</h2>
-            <p>
-              High-quality audio of the service, playing automatically with the
-              broadcast.
-            </p>
+      {/* Next Service Countdown Banner (When Offline) */}
+      {!isLiveVideo && (
+        <section className="live-countdown-banner">
+          <div className="countdown-info">
+            <span className="countdown-eyebrow">NEXT WORSHIP BROADCAST</span>
+            <h3>Sunday Divine Service &bull; Hola Sanctuary</h3>
+            <p>1st Service (Swahili) 8:30 AM &bull; 2nd Service (English) 10:45 AM</p>
           </div>
-          <AudioPlayer
-            src={liveSource}
-            title={liveTrack.title}
-            subtitle={liveTrack.speaker}
-            autoPlay
-            isLive
-          />
+          <div className="countdown-timer-display" aria-label="Time until next service">
+            <div className="timer-unit">
+              <strong>{String(timeRemaining.hours).padStart(2, "0")}</strong>
+              <small>Hours</small>
+            </div>
+            <span className="timer-sep">:</span>
+            <div className="timer-unit">
+              <strong>{String(timeRemaining.minutes).padStart(2, "0")}</strong>
+              <small>Mins</small>
+            </div>
+            <span className="timer-sep">:</span>
+            <div className="timer-unit">
+              <strong>{String(timeRemaining.seconds).padStart(2, "0")}</strong>
+              <small>Secs</small>
+            </div>
+          </div>
         </section>
-      ) : null}
+      )}
 
-      {recordings.length > 0 ? (
-        <section className="live-audio-section">
-          <div className="live-audio-heading">
-            <span className="eyebrow">Worship audio</span>
-            <h2>Listen to recent services</h2>
-            <p>
-              HD recordings published by the church — pause, rewind and forward
-              at any time.
-            </p>
-          </div>
-          <AudioPlayer
-            src={audioSourceFor(recordings[0])}
-            title={recordings[0].title}
-            subtitle={recordings[0].speaker}
-          />
-          {recordings.length > 1 ? (
-            <ol className="live-audio-list">
-              {recordings.slice(1).map((track) => (
-                <li key={track.id}>
-                  <div>
-                    <strong>{track.title}</strong>
-                    <small>
-                      {[track.speaker, track.recorded_at]
-                        .filter(Boolean)
-                        .join(" · ")}
-                    </small>
+      {/* Companion Tabs: Digital Bulletin & Service Giving */}
+      <section className="live-companion-section">
+        <div className="companion-tabs" role="tablist">
+          <button
+            type="button"
+            role="tab"
+            aria-selected={activeTab === "bulletin"}
+            className={`companion-tab-btn ${activeTab === "bulletin" ? "active" : ""}`}
+            onClick={() => setActiveTab("bulletin")}
+          >
+            <i className="fa-solid fa-book-bible" aria-hidden="true" />
+            <span>Order of Service &amp; Bulletin</span>
+          </button>
+          <button
+            type="button"
+            role="tab"
+            aria-selected={activeTab === "giving"}
+            className={`companion-tab-btn ${activeTab === "giving" ? "active" : ""}`}
+            onClick={() => setActiveTab("giving")}
+          >
+            <i className="fa-solid fa-hand-holding-dollar" aria-hidden="true" />
+            <span>Lipa na M-PESA Giving</span>
+          </button>
+        </div>
+
+        <div className="companion-tab-content">
+          {activeTab === "bulletin" && (
+            <div className="bulletin-view">
+              <div className="bulletin-header">
+                <div>
+                  <h3>Order of Divine Worship</h3>
+                  <p>Follow along with our reverent service liturgy and Scripture reflections.</p>
+                </div>
+                <span className="bulletin-badge">Sunday Liturgy</span>
+              </div>
+
+              <div className="bulletin-items-list">
+                {orderOfService.map((entry, idx) => (
+                  <div key={entry.item} className="bulletin-row">
+                    <span className="bulletin-num">0{idx + 1}</span>
+                    <div className="bulletin-details">
+                      <strong>{entry.item}</strong>
+                      <small>{entry.leader}</small>
+                    </div>
+                    <span className="bulletin-scripture">{entry.scripture}</span>
                   </div>
+                ))}
+              </div>
+            </div>
+          )}
+
+          {activeTab === "giving" && (
+            <div className="live-giving-view">
+              <MpesaGiving variant="hub" />
+            </div>
+          )}
+        </div>
+      </section>
+
+      {/* Audio Sermons & Recordings Archive */}
+      {recordings.length > 0 && (
+        <section className="live-audio-section">
+          <div className="section-heading">
+            <div>
+              <span className="eyebrow">Audio Archive</span>
+              <h2>Listen to Recent Recorded Messages</h2>
+            </div>
+            <p>High-quality audio recordings published by our pulpit ministry.</p>
+          </div>
+
+          <div className="live-audio-featured-box">
+            <AudioPlayer
+              src={audioSourceFor(recordings[0])}
+              title={recordings[0].title}
+              subtitle={recordings[0].speaker}
+            />
+          </div>
+
+          {recordings.length > 1 && (
+            <ol className="live-audio-list">
+              {recordings.slice(1, 6).map((track) => (
+                <li key={track.id} className="live-audio-list-item">
+                  <div className="audio-item-meta">
+                    <i className="fa-solid fa-volume-high" aria-hidden="true" />
+                    <div>
+                      <strong>{track.title}</strong>
+                      <small>{[track.speaker, track.recorded_at].filter(Boolean).join(" · ")}</small>
+                    </div>
+                  </div>
+                  <button
+                    type="button"
+                    className="button secondary sm"
+                    onClick={() => {
+                      setLiveTrack({ ...track, is_live: false });
+                    }}
+                  >
+                    <i className="fa-solid fa-play" /> Play
+                  </button>
                 </li>
               ))}
             </ol>
-          ) : null}
+          )}
         </section>
-      ) : null}
+      )}
 
+      {/* Notification Banner */}
       <section className="live-note">
         <i className="fa-solid fa-bell" aria-hidden="true" />
         <div>
-          <h2>Never miss a service</h2>
-          <p>
-            Enable browser alerts here, or subscribe on YouTube for alerts when
-            you are away.
-          </p>
+          <h2>Never Miss a Sanctuary Broadcast</h2>
+          <p>Enable browser notifications to be alerted whenever AIC Hola goes live, or subscribe on YouTube.</p>
         </div>
-        <button className="button secondary" type="button" onClick={enableAlerts}>
-          {alertsEnabled ? "Alerts enabled" : "Enable live alerts"}
-        </button>
-        <a
-          className="button secondary"
-          href="https://www.youtube.com/@nkandi242"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Visit channel
-        </a>
+        <div className="live-note-actions">
+          <button className="button secondary" type="button" onClick={enableAlerts}>
+            {alertsEnabled ? "Alerts Enabled" : "Enable Alerts"}
+          </button>
+          <a
+            className="button gold"
+            href="https://www.youtube.com/@nkandi242"
+            target="_blank"
+            rel="noopener noreferrer"
+          >
+            Subscribe on YouTube
+          </a>
+        </div>
       </section>
     </div>
   );
