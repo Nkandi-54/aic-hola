@@ -226,8 +226,7 @@ export default function Home() {
             )}
 
             <h1 className="hero-title">
-              Where the Bible speaks, <br />
-              <em className="hero-title-accent">grace abounds.</em>
+              Where the Bible speaks.
             </h1>
 
             <p className="hero-lead">
