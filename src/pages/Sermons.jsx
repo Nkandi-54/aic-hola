@@ -1,7 +1,7 @@
 import React, { useEffect, useMemo, useState } from "react";
-import AudioPlayer from "../components/AudioPlayer";
 import YouTubeEmbed from "../components/YouTubeEmbed";
 import { isSupabaseConfigured, supabase } from "../lib/supabase";
+import { useAudio } from "../context/AudioContext";
 import "./Sermons.css";
 
 const channelUrl = "https://www.youtube.com/@nkandi242";
@@ -76,13 +76,23 @@ const extractYouTubeId = (input) => {
 };
 
 export default function Sermons() {
+  const { playTrack } = useAudio();
   const [sermons, setSermons] = useState(defaultSermons);
   const [activeFilter, setActiveFilter] = useState("all");
   const [search, setSearch] = useState("");
 
   const [activeManuscript, setActiveManuscript] = useState(null);
   const [activeVideo, setActiveVideo] = useState(null);
-  const [activeAudio, setActiveAudio] = useState(null);
+
+  const handlePlayAudio = (sermon) => {
+    if (!sermon?.audio_url) return;
+    playTrack({
+      id: sermon.id,
+      title: sermon.title,
+      subtitle: `${sermon.preacher}${sermon.service_date ? ` · ${sermon.service_date}` : ""}`,
+      src: sermon.audio_url,
+    });
+  };
 
   useEffect(() => {
     let channel;
@@ -205,7 +215,7 @@ export default function Sermons() {
                 type="button"
                 className="button ghost"
                 style={{ borderColor: "#dfb86a", color: "#fff9f3" }}
-                onClick={() => setActiveAudio(featuredSermon)}
+                onClick={() => handlePlayAudio(featuredSermon)}
               >
                 <i className="fa-solid fa-headphones" aria-hidden="true" /> Listen Audio
               </button>
@@ -331,7 +341,7 @@ export default function Sermons() {
                   <button
                     type="button"
                     className="sermon-btn gold"
-                    onClick={() => setActiveAudio(sermon)}
+                    onClick={() => handlePlayAudio(sermon)}
                   >
                     <i className="fa-solid fa-headphones" aria-hidden="true" /> Listen
                   </button>
@@ -473,32 +483,6 @@ export default function Sermons() {
               <YouTubeEmbed videoId={activeVideo.videoId} title={activeVideo.title} />
             </div>
           </div>
-        </div>
-      ) : null}
-
-      {/* --- Sticky Audio Player Bar --- */}
-      {activeAudio ? (
-        <div className="sermon-audio-bar">
-          <div style={{ minWidth: "200px" }}>
-            <strong style={{ display: "block", fontSize: "0.95rem" }}>{activeAudio.title}</strong>
-            <small style={{ opacity: 0.8 }}>{activeAudio.preacher} · {activeAudio.service_date}</small>
-          </div>
-          <div style={{ flex: 1, maxWidth: "600px" }}>
-            <AudioPlayer
-              src={activeAudio.audio_url}
-              title={activeAudio.title}
-              subtitle={activeAudio.preacher}
-              autoPlay={true}
-            />
-          </div>
-          <button
-            type="button"
-            className="button ghost"
-            style={{ color: "#fff9f3", borderColor: "rgba(255,255,255,0.4)" }}
-            onClick={() => setActiveAudio(null)}
-          >
-            ✕ Close
-          </button>
         </div>
       ) : null}
     </div>

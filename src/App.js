@@ -3,6 +3,9 @@ import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
 import ScrollToTop from "./components/ScrollToTop";
 import Navbar from "./components/Navbar";
 import Footer from "./components/Footer";
+import GlobalAudioDock from "./components/GlobalAudioDock";
+import MobileQuickDock from "./components/MobileQuickDock";
+import { AudioProvider } from "./context/AudioContext";
 import Home from "./pages/Home";
 import History from "./pages/History";
 import Choirs from "./pages/Choirs";
@@ -27,44 +30,48 @@ import "./App.css";
 
 function App() {
   return (
-    <Router>
-      <ScrollToTop />
-      <div className="app-container">
-        <Navbar />
+    <AudioProvider>
+      <Router>
+        <ScrollToTop />
+        <div className="app-container">
+          <Navbar />
 
-        <main className="content-wrap" id="main-content">
-          <Routes>
-            <Route path="/" element={<Home />} />
-            <Route path="/history" element={<History />} />
-            <Route path="/choirs/*" element={<Choirs />} />
-            <Route path="/sermons" element={<Sermons />} />
-            <Route path="/live" element={<Live />} />
-            <Route path="/gallery" element={<Gallery />} />
-            <Route path="/contacts" element={<Contacts />} />
-            <Route path="/updates" element={<Updates />} />
-            <Route path="/calendar" element={<Calendar />} />
+          <main className="content-wrap" id="main-content">
+            <Routes>
+              <Route path="/" element={<Home />} />
+              <Route path="/history" element={<History />} />
+              <Route path="/choirs/*" element={<Choirs />} />
+              <Route path="/sermons" element={<Sermons />} />
+              <Route path="/live" element={<Live />} />
+              <Route path="/gallery" element={<Gallery />} />
+              <Route path="/contacts" element={<Contacts />} />
+              <Route path="/updates" element={<Updates />} />
+              <Route path="/calendar" element={<Calendar />} />
 
-            <Route path="/account" element={<Account />} />
-            <Route path="/reset-password" element={<ResetPassword />} />
+              <Route path="/account" element={<Account />} />
+              <Route path="/reset-password" element={<ResetPassword />} />
 
-            <Route path="/admin" element={<Admin />} />
-            <Route path="/admin/people" element={<Admin initialTab="people" />} />
-            <Route path="/admin/departments" element={<Admin initialTab="heads" />} />
-            <Route path="/admin/invitations" element={<Admin initialTab="invite" />} />
-            <Route path="/workspace" element={<Workspace />} />
-            <Route path="/manage/events" element={<ManageContent />} />
-            <Route path="/treasury" element={<Treasury />} />
-            <Route path="/records" element={<Records />} />
-            <Route path="/media" element={<WorshipMedia />} />
-            <Route path="/pastor-desk" element={<PastorDesk />} />
-            <Route path="/privacy" element={<Privacy />} />
-            <Route path="*" element={<NotFound />} />
-          </Routes>
-        </main>
+              <Route path="/admin" element={<Admin />} />
+              <Route path="/admin/people" element={<Admin initialTab="people" />} />
+              <Route path="/admin/departments" element={<Admin initialTab="heads" />} />
+              <Route path="/admin/invitations" element={<Admin initialTab="invite" />} />
+              <Route path="/workspace" element={<Workspace />} />
+              <Route path="/manage/events" element={<ManageContent />} />
+              <Route path="/treasury" element={<Treasury />} />
+              <Route path="/records" element={<Records />} />
+              <Route path="/media" element={<WorshipMedia />} />
+              <Route path="/pastor-desk" element={<PastorDesk />} />
+              <Route path="/privacy" element={<Privacy />} />
+              <Route path="*" element={<NotFound />} />
+            </Routes>
+          </main>
 
-        <Footer />
-      </div>
-    </Router>
+          <Footer />
+          <GlobalAudioDock />
+          <MobileQuickDock />
+        </div>
+      </Router>
+    </AudioProvider>
   );
 }
 

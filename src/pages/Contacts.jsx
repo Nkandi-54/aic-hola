@@ -277,13 +277,85 @@ export default function Contacts() {
             <span>{contactInfo.location}</span>
           </div>
           <a
-            href={contactInfo.maps}
+            href="https://www.google.com/maps/dir/?api=1&destination=AIC+Hola+Church+Hola+Kenya"
             target="_blank"
             rel="noopener noreferrer"
             className="button secondary sm map-external-btn"
           >
-            <i className="fa-solid fa-diamond-turn-right" aria-hidden="true" /> Open in Google Maps
+            <i className="fa-solid fa-diamond-turn-right" aria-hidden="true" /> Get Driving & Walking Route
           </a>
+        </div>
+      </section>
+
+      {/* Interactive Sanctuary Compound Map & GPS Guide */}
+      <section className="contact-map-section" aria-label="Interactive Sanctuary Map">
+        <div className="contact-map-card">
+          <div className="contact-map-header">
+            <div>
+              <span className="contact-map-kicker">Interactive Compound Guide</span>
+              <h3 className="contact-map-title">Sanctuary Location & Campus Map</h3>
+              <p className="contact-map-desc">
+                Centrally located in Hola Town, Tana River County. Secure perimeter parking and barrier-free access available for all worshippers.
+              </p>
+            </div>
+            <div className="contact-map-quick-actions">
+              <a
+                href="https://www.google.com/maps/dir/?api=1&destination=AIC+Hola+Church+Hola+Kenya"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="button primary sm"
+              >
+                <i className="fa-solid fa-diamond-turn-right" aria-hidden="true" /> Open GPS Navigation
+              </a>
+            </div>
+          </div>
+
+          <div className="contact-map-frame-wrapper">
+            <iframe
+              title="AIC Hola Church Compound Map"
+              src="https://maps.google.com/maps?q=AIC+Hola+Church,+Hola+Town,+Kenya&t=&z=15&ie=UTF8&iwloc=&output=embed"
+              className="contact-map-iframe"
+              loading="lazy"
+              referrerPolicy="no-referrer-when-downgrade"
+            />
+            <div className="contact-map-badge">
+              <i className="fa-solid fa-church" aria-hidden="true" />
+              <div>
+                <strong>AIC Hola Main Sanctuary</strong>
+                <span>Hola Town Centre · Tana River County</span>
+              </div>
+            </div>
+          </div>
+
+          <div className="contact-map-features-grid">
+            <div className="map-feature-item">
+              <div className="map-feature-icon">
+                <i className="fa-solid fa-square-parking" aria-hidden="true" />
+              </div>
+              <div>
+                <strong>Secure Compound Parking</strong>
+                <p>Dedicated on-site parking for vehicles, vans, and motorbikes with church wardens.</p>
+              </div>
+            </div>
+            <div className="map-feature-item">
+              <div className="map-feature-icon">
+                <i className="fa-solid fa-wheelchair" aria-hidden="true" />
+              </div>
+              <div>
+                <strong>Accessibility & Ramps</strong>
+                <p>Step-free sanctuary doors, paved rampways, and reserved front seating for seniors.</p>
+              </div>
+            </div>
+            <div className="map-feature-item">
+              <div className="map-feature-icon">
+                <i className="fa-solid fa-bus-simple" aria-hidden="true" />
+              </div>
+              <div>
+                <strong>Public Transit Access</strong>
+                <p>3-minute walk from the main Hola Matatu Stage & County Commissioner roundabout.</p>
+              </div>
+            </div>
+          </div>
         </div>
       </section>
     </div>

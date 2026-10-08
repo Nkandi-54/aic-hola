@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import MpesaGiving from "../components/MpesaGiving";
+import { getNextServiceInfo } from "../lib/services";
 import { updates } from "../data/updates";
 import "./Home.css";
 
@@ -135,6 +136,14 @@ export default function Home() {
     message: "",
   });
   const [submittedPrayer, setSubmittedPrayer] = useState(false);
+  const [serviceInfo, setServiceInfo] = useState(getNextServiceInfo());
+
+  useEffect(() => {
+    const timer = setInterval(() => {
+      setServiceInfo(getNextServiceInfo());
+    }, 1000);
+    return () => clearInterval(timer);
+  }, []);
 
   useEffect(() => {
     if (prayerModalOpen) {
@@ -194,6 +203,30 @@ export default function Home() {
             <div className="hero-eyebrow">
               <span className="hero-eyebrow-rule" aria-hidden="true" />
               <span>AIC HOLA &bull; EST. 1975 &bull; 50 YEARS OF FAITH</span>
+            </div>
+
+            {/* Dynamic Next Service Live Countdown Badge */}
+            <div className={`hero-service-ticker ${serviceInfo.isLiveNow ? "live-pulse-active" : ""}`}>
+              <span className="ticker-beacon" aria-hidden="true">
+                <span className="beacon-dot" />
+              </span>
+              <span className="ticker-badge">{serviceInfo.badge}</span>
+              <span className="ticker-divider" aria-hidden="true">&bull;</span>
+              {serviceInfo.isLiveNow ? (
+                <Link to="/live" className="ticker-live-link">
+                  <strong>Service in Session</strong> &mdash; Watch Live Broadcast <i className="fa-solid fa-arrow-right" />
+                </Link>
+              ) : (
+                <span className="ticker-countdown">
+                  Starts in{" "}
+                  {serviceInfo.timeRemaining.days > 0 && (
+                    <strong>{serviceInfo.timeRemaining.days}d </strong>
+                  )}
+                  <strong>{serviceInfo.timeRemaining.hours}h </strong>
+                  <strong>{serviceInfo.timeRemaining.minutes}m </strong>
+                  <strong>{serviceInfo.timeRemaining.seconds}s</strong>
+                </span>
+              )}
             </div>
 
             <h1 className="hero-title">

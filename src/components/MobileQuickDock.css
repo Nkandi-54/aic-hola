@@ -1,0 +1,242 @@
+/* Mobile Sunday Companion Quick Dock */
+.mobile-quick-dock {
+  display: none;
+}
+
+@media (max-width: 768px) {
+  .mobile-quick-dock {
+    display: flex;
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    height: calc(64px + env(safe-area-inset-bottom, 0px));
+    padding-bottom: env(safe-area-inset-bottom, 0px);
+    background: rgba(18, 48, 35, 0.96);
+    backdrop-filter: blur(16px);
+    -webkit-backdrop-filter: blur(16px);
+    border-top: 1px solid rgba(223, 184, 106, 0.35);
+    box-shadow: 0 -8px 24px rgba(0, 0, 0, 0.25);
+    z-index: 999;
+    align-items: stretch;
+    justify-content: space-around;
+  }
+
+  .mqd-item {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 3px;
+    background: transparent;
+    border: none;
+    color: rgba(255, 249, 243, 0.75);
+    text-decoration: none;
+    font-size: 0.68rem;
+    font-weight: 700;
+    letter-spacing: 0.02em;
+    cursor: pointer;
+    transition: color 140ms ease;
+    padding: 6px 2px;
+  }
+
+  .mqd-item:active,
+  .mqd-item.active {
+    color: var(--gold, #dfb86a);
+  }
+
+  .mqd-icon-wrap {
+    position: relative;
+    font-size: 1.15rem;
+    height: 24px;
+    display: grid;
+    place-items: center;
+  }
+
+  .mqd-live-dot {
+    position: absolute;
+    top: -2px;
+    right: -4px;
+    width: 7px;
+    height: 7px;
+    background: #e74c3c;
+    border-radius: 50%;
+    box-shadow: 0 0 6px #e74c3c;
+    animation: mqd-pulse 1.4s infinite ease-in-out;
+  }
+
+  @keyframes mqd-pulse {
+    0%, 100% {
+      transform: scale(1);
+      opacity: 1;
+    }
+    50% {
+      transform: scale(1.4);
+      opacity: 0.7;
+    }
+  }
+
+  .mqd-icon-give {
+    color: var(--gold, #dfb86a);
+  }
+
+  .mqd-give-btn {
+    color: #fff9f3;
+  }
+
+  /* Adjust page padding on mobile so content isn't covered by dock */
+  body {
+    padding-bottom: calc(68px + env(safe-area-inset-bottom, 0px));
+  }
+}
+
+/* Slide-Up M-PESA Sheet */
+.mqd-sheet-backdrop {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.65);
+  backdrop-filter: blur(6px);
+  -webkit-backdrop-filter: blur(6px);
+  z-index: 2000;
+  display: flex;
+  align-items: flex-end;
+  animation: mqd-fade-in 180ms ease forwards;
+}
+
+@keyframes mqd-fade-in {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+.mqd-sheet-content {
+  width: 100%;
+  max-height: 85vh;
+  overflow-y: auto;
+  background: #ffffff;
+  border-radius: 24px 24px 0 0;
+  border-top: 1px solid rgba(223, 184, 106, 0.45);
+  padding: 16px 20px calc(24px + env(safe-area-inset-bottom, 0px));
+  box-shadow: 0 -16px 40px rgba(0, 0, 0, 0.3);
+  animation: mqd-sheet-up 260ms cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+@keyframes mqd-sheet-up {
+  from { transform: translateY(100%); }
+  to { transform: translateY(0); }
+}
+
+.mqd-sheet-handle {
+  width: 44px;
+  height: 5px;
+  background: #ded7ce;
+  border-radius: 3px;
+  margin: 0 auto 16px;
+}
+
+.mqd-sheet-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: 20px;
+}
+
+.mqd-sheet-kicker {
+  display: inline-block;
+  font-size: 0.74rem;
+  font-weight: 800;
+  color: #00a859; /* M-Pesa brand green */
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.mqd-sheet-header h3 {
+  margin: 2px 0 0;
+  font-family: var(--font-serif);
+  font-size: 1.35rem;
+  color: var(--forest-deep, #143829);
+}
+
+.mqd-sheet-close {
+  background: #f1ede5;
+  border: none;
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  font-size: 0.95rem;
+  color: #554437;
+  cursor: pointer;
+  display: grid;
+  place-items: center;
+}
+
+.mqd-sheet-cards {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  margin-bottom: 20px;
+}
+
+.mqd-give-card {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 14px;
+  padding: 14px 16px;
+  background: #fbf8f2;
+  border: 1px solid rgba(223, 184, 106, 0.4);
+  border-radius: 14px;
+}
+
+.mqd-card-meta {
+  display: flex;
+  flex-direction: column;
+}
+
+.mqd-card-label {
+  font-size: 0.72rem;
+  font-weight: 750;
+  color: #7b695a;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+.mqd-card-val {
+  font-family: var(--font-mono, monospace);
+  font-size: 1.15rem;
+  font-weight: 800;
+  color: var(--forest-deep, #143829);
+  letter-spacing: 0.02em;
+}
+
+.mqd-card-meta small {
+  font-size: 0.72rem;
+  color: #8c7b6d;
+}
+
+.mqd-copy-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 8px 14px;
+  background: var(--forest, #1e4d38);
+  color: #ffffff;
+  border: none;
+  border-radius: 10px;
+  font-size: 0.8rem;
+  font-weight: 700;
+  cursor: pointer;
+  flex-shrink: 0;
+  transition: background 140ms ease;
+}
+
+.mqd-copy-btn:active {
+  background: var(--forest-deep, #143829);
+}
+
+.mqd-sheet-footer .full-width {
+  width: 100%;
+  text-align: center;
+  justify-content: center;
+}
+
