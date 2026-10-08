@@ -25,6 +25,8 @@ const milestones = [
     description:
       "Through sacrificial giving, fellowship, and community labour, the first permanent sanctuary in Hola was consecrated for worship, Sunday School, and biblical instruction.",
     scripture: 'Psalm 84:1 · "How lovely is your dwelling place, Lord Almighty!"',
+    image: "/gallery/20260502_134933.jpg",
+    imageCaption: "AIC Hola compound gateway bearing church motto",
   },
   {
     year: "1990",
@@ -41,6 +43,8 @@ const milestones = [
     description:
       "Growth of dedicated choral ministries: Main Choir, Essence Choir, Youth Choir, and Sunday School Choir, ministering weekly in Swahili, Pokomo, and English.",
     scripture: 'Colossians 3:16 · "Singing psalms, hymns, and spiritual songs with gratitude in your hearts to God."',
+    image: "/gallery/20251229_110819.jpg",
+    imageCaption: "Choir ministries leading vibrant congregational worship",
   },
   {
     year: "2015",
@@ -49,6 +53,8 @@ const milestones = [
     description:
       "The congregation broke ground and dedicated our high-capacity modern sanctuary, equipped for multi-service worship, conference gatherings, and regional fellowships.",
     scripture: 'Haggai 2:9 · "The glory of this present house will be greater than the glory of the former house, says the Lord Almighty."',
+    image: "/gallery/20250608_115335.jpg",
+    imageCaption: "Modern cathedral sanctuary pulpit and hall",
   },
   {
     year: "2025+",
@@ -57,6 +63,8 @@ const milestones = [
     description:
       "Celebrating a half-century of uncompromised biblical exposition in Hola (1975–2025), launching live broadcasts and digital fellowship to connect worshippers everywhere.",
     scripture: 'Hebrews 13:8 · "Jesus Christ is the same yesterday and today and forever."',
+    image: "/gallery/20260423_155619.jpg",
+    imageCaption: "Panoramic aerial perspective of AIC Hola cathedral & grounds",
   },
 ];
 
@@ -124,16 +132,33 @@ export default function History() {
             <div className="timeline-dot-wrapper" aria-hidden="true">
               <div className="timeline-dot" />
             </div>
-            <div className="timeline-card">
-              <span className="timeline-era-tag">{milestone.era}</span>
-              <h2>{milestone.title}</h2>
-              <p>{milestone.description}</p>
-              {milestone.scripture && (
-                <blockquote className="timeline-scripture-seal">
-                  <i className="fa-solid fa-quote-left" aria-hidden="true" />
-                  <span className="scripture-seal-text">{milestone.scripture}</span>
-                </blockquote>
-              )}
+            <div className={`timeline-card ${milestone.image ? "has-media" : ""}`}>
+              <div className="timeline-card-inner">
+                <div className="timeline-card-content">
+                  <span className="timeline-era-tag">{milestone.era}</span>
+                  <h2>{milestone.title}</h2>
+                  <p>{milestone.description}</p>
+                  {milestone.scripture && (
+                    <blockquote className="timeline-scripture-seal">
+                      <i className="fa-solid fa-quote-left" aria-hidden="true" />
+                      <span className="scripture-seal-text">{milestone.scripture}</span>
+                    </blockquote>
+                  )}
+                </div>
+                {milestone.image && (
+                  <div className="timeline-media-wrap">
+                    <img
+                      src={milestone.image}
+                      alt={milestone.title}
+                      className="timeline-media-image"
+                      loading="lazy"
+                    />
+                    {milestone.imageCaption && (
+                      <span className="timeline-media-caption">{milestone.imageCaption}</span>
+                    )}
+                  </div>
+                )}
+              </div>
             </div>
           </article>
         ))}

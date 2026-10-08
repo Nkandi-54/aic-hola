@@ -2,6 +2,41 @@ import React, { useCallback, useEffect, useMemo, useState } from "react";
 import ConsoleLayout from "../components/ConsoleLayout";
 import { supabase } from "../lib/supabase";
 import { DEPARTMENTS, departmentLabel } from "../lib/auth";
+import "./Records.css";
+
+function ReportMediaBlock({ imageUrl, videoUrl, title }) {
+  if (!imageUrl && !videoUrl) return null;
+
+  const ytMatch = videoUrl?.match(
+    /(?:youtu\.be\/|youtube\.com\/(?:watch\?v=|embed\/|shorts\/))([\w-]{11})/,
+  );
+
+  return (
+    <div className="report-card-media">
+      {imageUrl ? (
+        <div className="report-card-image-frame">
+          <a href={imageUrl} target="_blank" rel="noreferrer" title="Click to view full image">
+            <img src={imageUrl} alt={title || "Report attachment"} loading="lazy" />
+          </a>
+        </div>
+      ) : null}
+      {videoUrl ? (
+        <div className="report-card-video-frame">
+          {ytMatch ? (
+            <iframe
+              src={`https://www.youtube-nocookie.com/embed/${ytMatch[1]}`}
+              title={title || "Video"}
+              allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+              allowFullScreen
+            />
+          ) : (
+            <video src={videoUrl} controls preload="metadata" />
+          )}
+        </div>
+      ) : null}
+    </div>
+  );
+}
 
 const RECORD_CLASSES = [
   "reports",
@@ -54,6 +89,8 @@ export default function Records() {
   const [records, setRecords] = useState([]);
   const [audit, setAudit] = useState([]);
   const [tab, setTab] = useState("browse");
+  const [viewMode, setViewMode] = useState("cards");
+  const [previewRecord, setPreviewRecord] = useState(null);
   const [filterClass, setFilterClass] = useState("all");
   const [filterDept, setFilterDept] = useState("all");
   const [recordForm, setRecordForm] = useState(emptyRecord);
@@ -235,9 +272,25 @@ export default function Records() {
 
       {tab === "browse" ? (
         <section className="panel">
-          <div className="row between">
+          <div className="row between" style={{ alignItems: "center", flexWrap: "wrap", gap: 12 }}>
             <h3 className="panel-title">Archive</h3>
-            <div className="row">
+            <div className="row" style={{ alignItems: "center", gap: 10, flexWrap: "wrap" }}>
+              <div className="records-view-toggle">
+                <button
+                  type="button"
+                  className={`records-view-btn ${viewMode === "cards" ? "active" : ""}`}
+                  onClick={() => setViewMode("cards")}
+                >
+                  Cards (Media View)
+                </button>
+                <button
+                  type="button"
+                  className={`records-view-btn ${viewMode === "table" ? "active" : ""}`}
+                  onClick={() => setViewMode("table")}
+                >
+                  Table
+                </button>
+              </div>
               <select
                 className="select"
                 value={filterClass}
@@ -264,102 +317,58 @@ export default function Records() {
               </select>
             </div>
           </div>
-          <div className="table-scroll">
-            <table className="data-table">
-              <thead>
-                <tr>
-                  <th>Title</th>
-                  <th>Class</th>
-                  <th>Department</th>
-                  <th>Filed</th>
-                  <th>Media</th>
-                  <th>File</th>
-                  <th></th>
-                </tr>
-              </thead>
-              <tbody>
-                {visible.length === 0 ? (
-                  <tr>
-                    <td colSpan={7}>
-                      <p className="empty-state">No records match this view.</p>
-                    </td>
-                  </tr>
-                ) : (
-                  visible.map((record) => (
-                    <tr key={record.id}>
-                      <td>
-                        <strong>{record.title}</strong>
-                        {record.is_confidential ? (
-                          <span
-                            className="badge subtle"
-                            style={{ marginLeft: 8 }}
-                          >
-                            Confidential
-                          </span>
-                        ) : null}
-                        <br />
-                        <small>{record.summary}</small>
-                      </td>
-                      <td>{record.class}</td>
-                      <td>
-                        {record.department
-                          ? departmentLabel(record.department)
-                          : "Church-wide"}
-                      </td>
-                      <td>
+
+          {viewMode === "cards" ? (
+            <div className="records-cards-grid">
+              {visible.length === 0 ? (
+                <p className="empty-state">No records match this view.</p>
+              ) : (
+                visible.map((record) => (
+                  <article key={record.id} className="report-card">
+                    <div className="report-card-head">
+                      <span className="report-class-badge">{record.class}</span>
+                      <span style={{ fontSize: "0.78rem", color: "var(--muted)" }}>
                         {new Date(record.created_at).toLocaleDateString()}
-                      </td>
-                      <td>
-                        <div className="row" style={{ gap: "6px", alignItems: "center", flexWrap: "wrap" }}>
-                          {record.image_url ? (
-                            <a
-                              href={record.image_url}
-                              target="_blank"
-                              rel="noreferrer"
-                              title="View attached photo"
-                            >
-                              <img
-                                src={record.image_url}
-                                alt="Attachment preview"
-                                style={{
-                                  width: 28,
-                                  height: 28,
-                                  borderRadius: 4,
-                                  objectFit: "cover",
-                                  border: "1px solid var(--line)",
-                                }}
-                              />
-                            </a>
-                          ) : null}
-                          {record.video_url ? (
-                            <a
-                              href={record.video_url}
-                              target="_blank"
-                              rel="noreferrer"
-                              className="badge subtle"
-                              title="Watch attached video"
-                            >
-                              🎬 Video
-                            </a>
-                          ) : null}
-                          {!record.image_url && !record.video_url ? (
-                            <span style={{ color: "var(--muted)" }}>—</span>
-                          ) : null}
-                        </div>
-                      </td>
-                      <td>
+                      </span>
+                    </div>
+                    <h4 className="report-card-title">{record.title}</h4>
+                    <div className="report-card-meta">
+                      <span>
+                        <i className="fa-solid fa-building" aria-hidden="true" />{" "}
+                        {record.department ? departmentLabel(record.department) : "Church-wide"}
+                      </span>
+                      {record.reference && <span>Ref: {record.reference}</span>}
+                      {record.is_confidential && <span className="badge subtle">Confidential</span>}
+                    </div>
+
+                    <p className="report-card-summary">{record.summary}</p>
+
+                    <ReportMediaBlock
+                      imageUrl={record.image_url}
+                      videoUrl={record.video_url}
+                      title={record.title}
+                    />
+
+                    <div className="report-card-footer">
+                      <div className="row" style={{ gap: 8 }}>
                         {record.storage_path ? (
                           <button
+                            type="button"
                             className="text-link"
                             onClick={() => openFile(record.storage_path)}
                           >
-                            Open
+                            <i className="fa-solid fa-file-arrow-down" /> Document
                           </button>
-                        ) : (
-                          "—"
-                        )}
-                      </td>
-                      <td className="row end">
+                        ) : null}
+                        <button
+                          type="button"
+                          className="text-link"
+                          onClick={() => setPreviewRecord(record)}
+                        >
+                          View Details
+                        </button>
+                      </div>
+                      <div className="row end" style={{ gap: 4 }}>
                         <button
                           className="icon-button"
                           title="Edit / Amend"
@@ -387,14 +396,232 @@ export default function Records() {
                         >
                           🗑
                         </button>
+                      </div>
+                    </div>
+                  </article>
+                ))
+              )}
+            </div>
+          ) : (
+            <div className="table-scroll">
+              <table className="data-table">
+                <thead>
+                  <tr>
+                    <th>Title</th>
+                    <th>Class</th>
+                    <th>Department</th>
+                    <th>Filed</th>
+                    <th>Media</th>
+                    <th>File</th>
+                    <th></th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {visible.length === 0 ? (
+                    <tr>
+                      <td colSpan={7}>
+                        <p className="empty-state">No records match this view.</p>
                       </td>
                     </tr>
-                  ))
-                )}
-              </tbody>
-            </table>
-          </div>
+                  ) : (
+                    visible.map((record) => (
+                      <tr key={record.id}>
+                        <td>
+                          <strong>{record.title}</strong>
+                          {record.is_confidential ? (
+                            <span
+                              className="badge subtle"
+                              style={{ marginLeft: 8 }}
+                            >
+                              Confidential
+                            </span>
+                          ) : null}
+                          <br />
+                          <small>{record.summary}</small>
+                        </td>
+                        <td>{record.class}</td>
+                        <td>
+                          {record.department
+                            ? departmentLabel(record.department)
+                            : "Church-wide"}
+                        </td>
+                        <td>
+                          {new Date(record.created_at).toLocaleDateString()}
+                        </td>
+                        <td>
+                          <div className="row" style={{ gap: "6px", alignItems: "center", flexWrap: "wrap" }}>
+                            {record.image_url ? (
+                              <a
+                                href={record.image_url}
+                                target="_blank"
+                                rel="noreferrer"
+                                title="View attached photo"
+                              >
+                                <img
+                                  src={record.image_url}
+                                  alt="Attachment preview"
+                                  style={{
+                                    width: 28,
+                                    height: 28,
+                                    borderRadius: 4,
+                                    objectFit: "cover",
+                                    border: "1px solid var(--line)",
+                                  }}
+                                />
+                              </a>
+                            ) : null}
+                            {record.video_url ? (
+                              <a
+                                href={record.video_url}
+                                target="_blank"
+                                rel="noreferrer"
+                                className="badge subtle"
+                                title="Watch attached video"
+                              >
+                                🎬 Video
+                              </a>
+                            ) : null}
+                            {!record.image_url && !record.video_url ? (
+                              <span style={{ color: "var(--muted)" }}>—</span>
+                            ) : null}
+                          </div>
+                        </td>
+                        <td>
+                          {record.storage_path ? (
+                            <button
+                              className="text-link"
+                              onClick={() => openFile(record.storage_path)}
+                            >
+                              Open
+                            </button>
+                          ) : (
+                            "—"
+                          )}
+                        </td>
+                        <td className="row end">
+                          <button
+                            className="icon-button"
+                            title="View Report & Media"
+                            onClick={() => setPreviewRecord(record)}
+                          >
+                            👁
+                          </button>
+                          <button
+                            className="icon-button"
+                            title="Edit / Amend"
+                            onClick={() => {
+                              setRecordForm({
+                                id: record.id,
+                                title: record.title,
+                                class: record.class,
+                                department: record.department || "",
+                                summary: record.summary || "",
+                                reference: record.reference || "",
+                                is_confidential: Boolean(record.is_confidential),
+                                image_url: record.image_url || "",
+                                video_url: record.video_url || "",
+                              });
+                              setTab("file");
+                            }}
+                          >
+                            ✎
+                          </button>
+                          <button
+                            className="icon-button"
+                            title="Delete"
+                            onClick={() => removeRecord(record.id)}
+                          >
+                            🗑
+                          </button>
+                        </td>
+                      </tr>
+                    ))
+                  )}
+                </tbody>
+              </table>
+            </div>
+          )}
         </section>
+      ) : null}
+
+      {previewRecord ? (
+        <div
+          className="report-modal-backdrop"
+          role="dialog"
+          aria-modal="true"
+          onClick={(e) => {
+            if (e.target === e.currentTarget) setPreviewRecord(null);
+          }}
+        >
+          <div className="report-modal-dialog">
+            <button
+              type="button"
+              className="report-modal-close"
+              aria-label="Close"
+              onClick={() => setPreviewRecord(null)}
+            >
+              ✕
+            </button>
+            <div className="report-card-head">
+              <span className="report-class-badge">{previewRecord.class}</span>
+              <span style={{ fontSize: "0.85rem", color: "var(--muted)" }}>
+                Filed: {new Date(previewRecord.created_at).toLocaleDateString()}
+              </span>
+            </div>
+
+            <div className={`report-modal-split ${previewRecord.image_url || previewRecord.video_url ? "has-media" : ""}`}>
+              <div className="report-modal-text">
+                <h2>{previewRecord.title}</h2>
+                <div className="report-card-meta">
+                  <span>
+                    <i className="fa-solid fa-building" aria-hidden="true" />{" "}
+                    {previewRecord.department ? departmentLabel(previewRecord.department) : "Church-wide"}
+                  </span>
+                  {previewRecord.reference && <span>Ref: {previewRecord.reference}</span>}
+                  {previewRecord.is_confidential && <span className="badge subtle">Confidential</span>}
+                </div>
+                <div className="report-modal-narrative">{previewRecord.summary}</div>
+                {previewRecord.storage_path ? (
+                  <div style={{ marginTop: 20 }}>
+                    <button
+                      type="button"
+                      className="button"
+                      onClick={() => openFile(previewRecord.storage_path)}
+                    >
+                      <i className="fa-solid fa-file-arrow-down" /> Download Attached Document
+                    </button>
+                  </div>
+                ) : null}
+              </div>
+
+              {(previewRecord.image_url || previewRecord.video_url) ? (
+                <div className="report-modal-media-wrap">
+                  {previewRecord.image_url ? (
+                    <div className="report-modal-media-item">
+                      <a href={previewRecord.image_url} target="_blank" rel="noreferrer" title="Click for high-resolution view">
+                        <img src={previewRecord.image_url} alt={previewRecord.title} />
+                      </a>
+                    </div>
+                  ) : null}
+                  {previewRecord.video_url ? (
+                    <div className="report-modal-media-item">
+                      {previewRecord.video_url.match(/(?:youtu\.be\/|youtube\.com\/(?:watch\?v=|embed\/|shorts\/))([\w-]{11})/) ? (
+                        <iframe
+                          src={`https://www.youtube-nocookie.com/embed/${previewRecord.video_url.match(/(?:youtu\.be\/|youtube\.com\/(?:watch\?v=|embed\/|shorts\/))([\w-]{11})/)[1]}`}
+                          title="Report Video"
+                          allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                          allowFullScreen
+                        />
+                      ) : (
+                        <video src={previewRecord.video_url} controls preload="metadata" />
+                      )}
+                    </div>
+                  ) : null}
+                </div>
+              ) : null}
+            </div>
+          </div>
+        </div>
       ) : null}
 
       {tab === "file" ? (

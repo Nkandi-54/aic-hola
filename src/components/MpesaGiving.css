@@ -278,10 +278,11 @@
 
 .mpesa-hub-value {
   font-family: var(--font-serif);
-  font-size: 1.75rem;
+  font-size: clamp(1.25rem, 2.6vw, 1.6rem);
   font-weight: 700;
   color: var(--forest-deep, #0b231a);
   letter-spacing: 0.02em;
+  word-break: break-word;
 }
 
 .mpesa-copy-btn {
@@ -296,6 +297,7 @@
   font-size: 0.78rem;
   font-weight: 700;
   cursor: pointer;
+  white-space: nowrap;
   transition: all 180ms ease;
 }
 
@@ -305,7 +307,42 @@
 }
 
 .mpesa-hub-sub {
-  font-size: 0.8rem;
+  font-size: 0.82rem;
   color: var(--muted, #645a50);
+}
+
+.mpesa-ledger-guide {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  padding: 12px 16px;
+  background: rgba(20, 56, 41, 0.04);
+  border: 1px solid rgba(223, 184, 106, 0.35);
+  border-left: 3px solid var(--forest);
+  border-radius: 10px;
+  font-size: 0.82rem;
+  color: var(--forest-deep);
+  line-height: 1.5;
+}
+
+.mpesa-ledger-guide i {
+  color: var(--forest);
+  font-size: 0.95rem;
+  margin-top: 2px;
+  flex-shrink: 0;
+}
+
+.mpesa-ledger-guide code {
+  background: rgba(20, 56, 41, 0.08);
+  padding: 2px 5px;
+  border-radius: 4px;
+  font-weight: 750;
+  color: var(--forest-deep);
+  font-family: inherit;
+}
+
+.mpesa-card-account-dd {
+  font-size: clamp(1rem, 2vw, 1.25rem) !important;
+  word-break: break-all;
 }
 

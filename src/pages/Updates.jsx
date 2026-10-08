@@ -80,7 +80,7 @@ export default function Updates() {
           {updateDepartments.map((item) => <button key={item} className={department === item ? "active" : ""} type="button" aria-pressed={department === item} onClick={() => setDepartment(item)}>{item}</button>)}
         </div>
         <div className="updates-list">
-          {visibleUpdates.map((item) => <article className="update-card" key={item.id}>
+          {visibleUpdates.map((item) => <article className={`update-card ${item.image_url || item.video_url ? "has-media" : ""}`} key={item.id}>
             <div className="update-card-topline">
               <span className="update-icon" style={{ backgroundColor: item.accent }}><i className={`fa-solid ${item.icon}`} aria-hidden="true" /></span>
               <span className="update-department">{item.department}</span>

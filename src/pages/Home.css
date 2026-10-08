@@ -1390,13 +1390,15 @@
 .prayer-modal-backdrop {
   position: fixed;
   inset: 0;
-  background: rgba(9, 20, 16, 0.72);
+  background: rgba(9, 20, 16, 0.82);
   backdrop-filter: blur(8px);
-  z-index: 1000;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  padding: 20px;
+  -webkit-backdrop-filter: blur(8px);
+  z-index: 10000;
+  display: grid;
+  place-items: center;
+  padding: clamp(16px, 3vh, 32px) 16px;
+  overflow-y: auto;
+  overscroll-behavior: contain;
   animation: fadeIn 200ms ease;
 }
 
@@ -1408,12 +1410,15 @@
 .prayer-modal-dialog {
   position: relative;
   width: 100%;
-  max-width: 540px;
+  max-width: 500px;
+  max-height: calc(100vh - 40px);
+  overflow-y: auto;
+  margin: auto;
   background: #ffffff;
-  border: 1px solid rgba(223, 184, 106, 0.5);
-  border-radius: 28px;
-  padding: clamp(28px, 4vw, 40px);
-  box-shadow: 0 24px 60px rgba(0, 0, 0, 0.35);
+  border: 1px solid rgba(223, 184, 106, 0.55);
+  border-radius: 22px;
+  padding: clamp(20px, 3vw, 28px);
+  box-shadow: 0 24px 60px rgba(0, 0, 0, 0.45);
   animation: scaleIn 220ms ease;
 }
 
@@ -1424,10 +1429,10 @@
 
 .prayer-modal-close {
   position: absolute;
-  top: 20px;
-  right: 20px;
-  width: 36px;
-  height: 36px;
+  top: 16px;
+  right: 16px;
+  width: 34px;
+  height: 34px;
   border-radius: 50%;
   background: rgba(20, 56, 41, 0.08);
   border: none;
@@ -1446,55 +1451,62 @@
 }
 
 .prayer-modal-header {
-  margin-bottom: 22px;
+  margin-bottom: 14px;
+  padding-right: 28px;
 }
 
 .prayer-modal-header h3 {
-  margin: 6px 0 8px;
+  margin: 4px 0 4px;
   font-family: var(--font-serif);
-  font-size: 1.7rem;
+  font-size: 1.45rem;
   color: var(--forest-deep);
 }
 
 .prayer-modal-header p {
   margin: 0;
-  font-size: 0.92rem;
+  font-size: 0.86rem;
   color: #6d5b4c;
-  line-height: 1.5;
+  line-height: 1.45;
 }
 
 .prayer-modal-form {
   display: flex;
   flex-direction: column;
-  gap: 16px;
+  gap: 11px;
 }
 
 .prayer-form-field {
   display: flex;
   flex-direction: column;
-  gap: 6px;
+  gap: 4px;
 }
 
 .prayer-form-field label {
-  font-size: 0.82rem;
+  font-size: 0.74rem;
   font-weight: 750;
   color: var(--forest-deep);
   text-transform: uppercase;
-  letter-spacing: 0.04em;
+  letter-spacing: 0.05em;
 }
 
 .prayer-form-field input,
 .prayer-form-field select,
 .prayer-form-field textarea {
-  padding: 12px 14px;
-  background: rgba(251, 248, 242, 0.85);
+  padding: 9px 12px;
+  background: rgba(251, 248, 242, 0.9);
   border: 1px solid rgba(223, 184, 106, 0.45);
-  border-radius: 12px;
+  border-radius: 10px;
   font-family: inherit;
-  font-size: 0.95rem;
+  font-size: 0.92rem;
   color: var(--ink);
   outline: none;
   transition: border-color 180ms ease, box-shadow 180ms ease;
+}
+
+.prayer-form-field textarea {
+  min-height: 72px;
+  max-height: 120px;
+  resize: vertical;
 }
 
 .prayer-form-field input:focus,
@@ -1507,8 +1519,8 @@
 .prayer-modal-actions {
   display: flex;
   align-items: center;
-  gap: 12px;
-  margin-top: 10px;
+  gap: 10px;
+  margin-top: 6px;
 }
 
 .prayer-modal-success {

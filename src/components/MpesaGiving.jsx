@@ -40,7 +40,7 @@ export default function MpesaGiving({ variant = "card", className = "" }) {
         <span className="mpesa-footer-details">
           <span>Paybill <strong>247247</strong></span>
           <span className="mpesa-sep" aria-hidden="true">·</span>
-          <span>Account <strong>802200</strong></span>
+          <span>Account <strong>802200#TITHE / #OFFERING</strong></span>
         </span>
       </div>
     );
@@ -48,10 +48,48 @@ export default function MpesaGiving({ variant = "card", className = "" }) {
 
   if (variant === "hub") {
     const categories = [
-      { key: "tithe", label: "Tithe & Offering", account: "802200", note: "Use '802200' or specify 'Tithe / Your Name'" },
-      { key: "building", label: "Church Building", account: "802200", note: "Specify 'Building / Your Name'" },
-      { key: "missions", label: "Missions & Outreach", account: "802200", note: "Specify 'Missions / Your Name'" },
-      { key: "benevolence", label: "Needy & Benevolence", account: "802200", note: "Specify 'Needy Fund / Your Name'" },
+      {
+        key: "tithe",
+        label: "Tithe",
+        account: "802200#TITHE",
+        purpose: "Tithe (10% Firstfruits)",
+        note: "Enter '802200#TITHE' in Account Number (or '802200#TITHE#YourName')",
+      },
+      {
+        key: "offering",
+        label: "General Offering",
+        account: "802200#OFFERING",
+        purpose: "Sunday & Midweek Offertory",
+        note: "Enter '802200#OFFERING' in Account Number",
+      },
+      {
+        key: "building",
+        label: "Church Building",
+        account: "802200#BUILDING",
+        purpose: "Cathedral Development & Maintenance",
+        note: "Enter '802200#BUILDING' in Account Number",
+      },
+      {
+        key: "missions",
+        label: "Missions & Outreach",
+        account: "802200#MISSIONS",
+        purpose: "Evangelism & Regional Mission Fields",
+        note: "Enter '802200#MISSIONS' in Account Number",
+      },
+      {
+        key: "benevolence",
+        label: "Needy & Benevolence",
+        account: "802200#NEEDY",
+        purpose: "Compassion Ministry & Vulnerable Families",
+        note: "Enter '802200#NEEDY' in Account Number",
+      },
+      {
+        key: "thanksgiving",
+        label: "Thanksgiving",
+        account: "802200#THANKSGIVING",
+        purpose: "Special Praise & Thanksgiving Giving",
+        note: "Enter '802200#THANKSGIVING' in Account Number",
+      },
     ];
 
     const current = categories.find((c) => c.key === activeCategory) || categories[0];
@@ -64,7 +102,7 @@ export default function MpesaGiving({ variant = "card", className = "" }) {
             <span className="mpesa-hub-badge">LIPA NA M-PESA</span>
           </div>
           <p className="mpesa-hub-intro">
-            Support ministry, community outreach, and church development in Hola.
+            Support worship, outreach, and development through Equity Paybill <strong>247247</strong>. Use the standard Kenyan ledger format <code>802200#TITHE</code> or <code>802200#OFFERING</code> to route your gift directly to the right fund.
           </p>
         </div>
 
@@ -104,7 +142,7 @@ export default function MpesaGiving({ variant = "card", className = "" }) {
           </div>
 
           <div className="mpesa-hub-box">
-            <span className="mpesa-hub-label">ACCOUNT NUMBER</span>
+            <span className="mpesa-hub-label">ACCOUNT NUMBER ({current.label.toUpperCase()})</span>
             <div className="mpesa-hub-value-row">
               <strong className="mpesa-hub-value">{current.account}</strong>
               <button
@@ -119,6 +157,13 @@ export default function MpesaGiving({ variant = "card", className = "" }) {
             </div>
             <span className="mpesa-hub-sub">{current.note}</span>
           </div>
+        </div>
+
+        <div className="mpesa-ledger-guide">
+          <i className="fa-solid fa-circle-info" aria-hidden="true" />
+          <span>
+            <strong>Kenyan Church Ledger Tip:</strong> Entering <code>{current.account}</code> automatically reconciles your gift to the church&rsquo;s <strong>{current.purpose}</strong> bank sub-ledger. You can also append your name (e.g. <code>{current.account}#YOURNAME</code>).
+          </span>
         </div>
 
         <div className="mpesa-scripture-ribbon">
@@ -154,13 +199,13 @@ export default function MpesaGiving({ variant = "card", className = "" }) {
         </div>
         <div>
           <dt>Account</dt>
-          <dd>
-            802200
+          <dd className="mpesa-card-account-dd">
+            802200#TITHE
             <button
               type="button"
               className="mpesa-copy-mini"
-              title="Copy Account"
-              onClick={() => copyToClipboard("802200", "card-account")}
+              title="Copy Tithe Account"
+              onClick={() => copyToClipboard("802200#TITHE", "card-account")}
             >
               <i className={`fa-solid ${copiedField === "card-account" ? "fa-check" : "fa-copy"}`} />
             </button>
@@ -171,7 +216,9 @@ export default function MpesaGiving({ variant = "card", className = "" }) {
         <i className="fa-solid fa-quote-left" aria-hidden="true" />
         <span>&ldquo;Honor the Lord with your wealth, with the firstfruits of all your increase.&rdquo; &mdash; Prov. 3:9</span>
       </div>
-      <p className="mpesa-card-note">Offerings &amp; tithes via mobile money.</p>
+      <p className="mpesa-card-note">
+        Enter <strong>802200#TITHE</strong> for tithes, or <strong>802200#OFFERING</strong> for general offerings.
+      </p>
     </section>
   );
 }

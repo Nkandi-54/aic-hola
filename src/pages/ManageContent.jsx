@@ -289,11 +289,14 @@ function MediaAttachmentFields({ form, setForm, prefix = "content" }) {
               src={form.image_url}
               alt="Attached preview"
               style={{
-                maxWidth: "200px",
-                maxHeight: "140px",
+                width: "100%",
+                maxWidth: "280px",
+                aspectRatio: "16 / 9",
                 objectFit: "cover",
-                borderRadius: "8px",
+                borderRadius: "12px",
                 border: "1px solid var(--line)",
+                boxShadow: "0 4px 12px rgba(0,0,0,0.06)",
+                display: "block",
               }}
             />
           </div>
@@ -351,10 +354,14 @@ function MediaAttachmentFields({ form, setForm, prefix = "content" }) {
                 src={form.video_url}
                 controls
                 style={{
-                  maxWidth: "240px",
-                  maxHeight: "140px",
-                  borderRadius: "8px",
+                  width: "100%",
+                  maxWidth: "280px",
+                  aspectRatio: "16 / 9",
+                  borderRadius: "12px",
                   border: "1px solid var(--line)",
+                  boxShadow: "0 4px 12px rgba(0,0,0,0.06)",
+                  display: "block",
+                  background: "#000",
                 }}
               />
             )}

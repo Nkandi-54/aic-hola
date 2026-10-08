@@ -231,7 +231,7 @@ export default function Calendar() {
 
       <section className="calendar-events-grid" aria-label="Upcoming church events">
         {filteredEvents.map((event) => (
-          <article className="calendar-card" key={event.id}>
+          <article className={`calendar-card ${event.image_url || event.video_url ? "has-media" : ""}`} key={event.id}>
             <div className="calendar-card-header">
               <span className="calendar-badge" style={{ borderColor: event.accent, color: event.accent }}>
                 <i className={`fa-solid ${event.icon || "fa-calendar-days"}`} aria-hidden="true" />

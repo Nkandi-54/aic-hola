@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import FlashyCard from "../components/FlashyCard";
 import MpesaGiving from "../components/MpesaGiving";
@@ -175,6 +175,16 @@ export default function Home() {
     message: "",
   });
   const [submittedPrayer, setSubmittedPrayer] = useState(false);
+
+  useEffect(() => {
+    if (prayerModalOpen) {
+      const orig = document.body.style.overflow;
+      document.body.style.overflow = "hidden";
+      return () => {
+        document.body.style.overflow = orig;
+      };
+    }
+  }, [prayerModalOpen]);
 
   const handlePrayerSubmit = (e) => {
     e.preventDefault();
@@ -787,7 +797,7 @@ export default function Home() {
                   <textarea
                     id="prayer-message"
                     required
-                    rows={4}
+                    rows={3}
                     placeholder="Write your request here..."
                     value={prayerFormData.message}
                     onChange={(e) => setPrayerFormData({ ...prayerFormData, message: e.target.value })}
