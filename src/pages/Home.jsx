@@ -1,48 +1,8 @@
 import React, { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
-import FlashyCard from "../components/FlashyCard";
 import MpesaGiving from "../components/MpesaGiving";
 import { updates } from "../data/updates";
 import "./Home.css";
-
-const featuredSections = [
-  {
-    title: "Our History",
-    description: "50-year journey of faith in Hola since 1975.",
-    to: "/history",
-    icon: "fa-landmark",
-    kind: "history",
-    meta: "Est. 1975",
-    accent: "#e8bd79",
-  },
-  {
-    title: "Worship & Choirs",
-    description: "Sacred choral praise, hymns, and worship teams.",
-    to: "/choirs",
-    icon: "fa-people-group",
-    kind: "choir",
-    meta: "Choir Ministry",
-    accent: "#a9c8af",
-  },
-  {
-    title: "Live Broadcasts",
-    description: "Sunday livestreams and recent service recordings.",
-    to: "/live",
-    icon: "fa-circle-play",
-    kind: "live",
-    meta: "Live Stream",
-    accent: "#eeb0a0",
-  },
-  {
-    title: "Sermons",
-    description: "Biblical teachings and sermon archives.",
-    to: "/sermons",
-    icon: "fa-book-bible",
-    kind: "sermon",
-    meta: "Messages",
-    accent: "#b9c8e8",
-  },
-];
 
 const serviceSchedules = [
   {
@@ -560,21 +520,6 @@ export default function Home() {
         </div>
       </section>
 
-      {/* Exploration Cards */}
-      <section className="home-section" aria-labelledby="explore-heading">
-        <div className="section-heading">
-          <div>
-            <span className="eyebrow">Explore</span>
-            <h2 id="explore-heading">Find Your Way In</h2>
-          </div>
-          <p>Explore sacred music, teachings, history, and live broadcasts.</p>
-        </div>
-        <div className="content-grid">
-          {featuredSections.map((section) => (
-            <FlashyCard key={section.title} {...section} />
-          ))}
-        </div>
-      </section>
 
       {/* Recent Sermons */}
       <section className="home-sermons-spotlight" aria-labelledby="sermons-heading">
