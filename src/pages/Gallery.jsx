@@ -22,7 +22,7 @@ const galleryCatalog = [
     title: "Church Pulpit Ministry",
     category: "Church Praise",
     date: "June 2025",
-    desc: "The sacred pulpit of AIC Hola where the Bible speaks and grace abounds.",
+    desc: "The sacred pulpit of AIC Hola where the Bible speaks.",
   },
   {
     file: "20251229_110819.jpg",

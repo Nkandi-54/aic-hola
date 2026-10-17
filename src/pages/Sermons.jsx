@@ -6,65 +6,6 @@ import "./Sermons.css";
 
 const channelUrl = "https://www.youtube.com/@nkandi242";
 
-const defaultSermons = [
-  {
-    id: "default-1",
-    title: "Walking in Faith",
-    series: "Living by Faith",
-    preacher: "AIC Hola Pulpit Ministry",
-    scripture: "Proverbs 3:5-6; Hebrews 11:1-6",
-    service_date: "2026-09-20",
-    description: "A message on trusting God in every situation, walking not by sight but by steady confidence in His promises.",
-    written_sermon: `Scripture Focus: Proverbs 3:5-6\n\n"Trust in the LORD with all your heart and lean not on your own understanding; in all your ways submit to him, and he will make your paths straight."\n\nMain Message Outline:\n1. The Foundation of Trust — Placing unconditional faith in God's unchanging character.\n2. Surrendering Our Own Understanding — Acknowledging human limitations in times of uncertainty.\n3. Stepping Out into Divine Guidance — When we submit our steps to Him, He clears the way ahead.\n\nPractical Devotional Reflection:\nTake a moment today to release whatever anxieties or uncertainties you are carrying into the Father's hands. Walk forward in quiet obedience, knowing that He goes before you.`,
-    video_url: channelUrl,
-    accent_color: "#e8bd79",
-    is_published: true,
-    is_featured: true,
-  },
-  {
-    id: "default-2",
-    title: "The Power of Prayer",
-    series: "Foundations of Worship",
-    preacher: "AIC Hola Pulpit Ministry",
-    scripture: "Philippians 4:6-7; James 5:16",
-    service_date: "2026-09-13",
-    description: "Exploring how prayer transforms lives, brings peace in anxiety, and aligns our hearts with God's perfect will.",
-    written_sermon: `Scripture Focus: Philippians 4:6-7\n\n"Do not be anxious about anything, but in every situation, by prayer and petition, with thanksgiving, present your requests to God."\n\nKey Reflections:\n• Prayer is not conquering God's reluctance; it is laying hold of His willingness.\n• Praying with sincere thanksgiving even before the answer is visible.\n• The supernatural peace that guards our hearts and minds in Christ Jesus.`,
-    video_url: channelUrl,
-    accent_color: "#b9c8e8",
-    is_published: true,
-    is_featured: false,
-  },
-  {
-    id: "default-3",
-    title: "Love and Fellowship",
-    series: "The Body of Christ",
-    preacher: "AIC Hola Pulpit Ministry",
-    scripture: "1 John 4:7-12; Hebrews 10:24-25",
-    service_date: "2026-09-06",
-    description: "A sermon about genuine Christian community, sacrificial love, and walking together in unity.",
-    written_sermon: `Scripture Focus: 1 John 4:11\n\n"Dear friends, since God so loved us, we also ought to love one another."\n\nPractical Applications:\n1. Bearing one another's burdens in love and patience.\n2. Forgiving as Christ has forgiven us.\n3. Consistent fellowship, prayer meetings, and mutual encouragement across our fellowships.`,
-    video_url: channelUrl,
-    accent_color: "#eeb0a0",
-    is_published: true,
-    is_featured: false,
-  },
-  {
-    id: "default-4",
-    title: "Hope in Hard Times",
-    series: "Anchored in Christ",
-    preacher: "AIC Hola Pulpit Ministry",
-    scripture: "Romans 8:28, 38-39; Psalm 46:1-3",
-    service_date: "2026-08-30",
-    description: "Finding unshakable strength, solace, and eternal hope through God's enduring Word.",
-    written_sermon: `Scripture Focus: Psalm 46:1\n\n"God is our refuge and strength, an ever-present help in trouble."\n\nEven when the earth gives way and mountains fall into the heart of the sea, our anchor holds firmly in Christ.\n\nNo trial or distress is beyond His sovereign grace.`,
-    video_url: channelUrl,
-    accent_color: "#a9c8af",
-    is_published: true,
-    is_featured: false,
-  },
-];
-
 const extractYouTubeId = (input) => {
   if (!input) return "";
   const trimmed = input.trim();
@@ -77,7 +18,7 @@ const extractYouTubeId = (input) => {
 
 export default function Sermons() {
   const { playTrack } = useAudio();
-  const [sermons, setSermons] = useState(defaultSermons);
+  const [sermons, setSermons] = useState([]);
   const [activeFilter, setActiveFilter] = useState("all");
   const [search, setSearch] = useState("");
 
@@ -274,7 +215,18 @@ export default function Sermons() {
       </div>
 
       {/* Sermons Grid */}
-      {filteredSermons.length === 0 ? (
+      {sermons.length === 0 ? (
+        <div className="sermons-empty-banner" style={{ textAlign: "center", padding: "48px 24px", background: "var(--surface)", border: "1px solid var(--line)", borderRadius: "18px", margin: "24px 0" }}>
+          <i className="fa-solid fa-book-bible" style={{ fontSize: "2.4rem", color: "var(--gold)", marginBottom: "16px", display: "inline-block" }} aria-hidden="true" />
+          <h3 style={{ fontFamily: "var(--font-serif)", fontSize: "1.4rem", color: "var(--forest-deep)", marginBottom: "10px" }}>AIC Hola Pulpit Ministry</h3>
+          <p style={{ maxWidth: "540px", margin: "0 auto 20px", color: "var(--ink-soft)", lineHeight: "1.6", fontSize: "0.95rem" }}>
+            Expository sermons, audio recordings, and study manuscripts published by the pastor will be catalogued here. You can also explore our worship broadcasts on our official YouTube channel.
+          </p>
+          <a href={channelUrl} target="_blank" rel="noopener noreferrer" className="button gold">
+            <i className="fa-brands fa-youtube" aria-hidden="true" /> Watch Services on YouTube
+          </a>
+        </div>
+      ) : filteredSermons.length === 0 ? (
         <p className="empty-state" style={{ textAlign: "center", padding: "40px" }}>
           No messages found matching your search. Try adjusting the filter or search keywords.
         </p>

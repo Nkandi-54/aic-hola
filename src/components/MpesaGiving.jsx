@@ -123,7 +123,7 @@ export default function MpesaGiving({ variant = "card", className = "" }) {
         {/* Direct Payment Lockup */}
         <div className="mpesa-hub-lockup">
           <div className="mpesa-hub-box">
-            <span className="mpesa-hub-label">BUSINESS NO. (PAYBILL)</span>
+            <span className="mpesa-hub-label">PAYBILL</span>
             <div className="mpesa-hub-value-row">
               <strong className="mpesa-hub-value">247247</strong>
               <button
@@ -136,11 +136,10 @@ export default function MpesaGiving({ variant = "card", className = "" }) {
                 <span>{copiedField === "paybill" ? "Copied" : "Copy"}</span>
               </button>
             </div>
-            <span className="mpesa-hub-sub">Equity Bank</span>
           </div>
 
           <div className="mpesa-hub-box">
-            <span className="mpesa-hub-label">ACCOUNT ({current.label.toUpperCase()})</span>
+            <span className="mpesa-hub-label">ACCOUNT</span>
             <div className="mpesa-hub-value-row">
               <strong className="mpesa-hub-value">{current.account}</strong>
               <button
@@ -153,16 +152,18 @@ export default function MpesaGiving({ variant = "card", className = "" }) {
                 <span>{copiedField === "account" ? "Copied" : "Copy"}</span>
               </button>
             </div>
-            <span className="mpesa-hub-sub">{current.note}</span>
           </div>
         </div>
 
-        <div className="mpesa-ledger-guide">
-          <i className="fa-solid fa-circle-info" aria-hidden="true" />
-          <span>
-            Reconciles directly to church <strong>{current.purpose}</strong> ledger. Optional: append your name (e.g. <code>{current.account}#YourName</code>).
-          </span>
+        <div className="mpesa-scripture-ribbon">
+          <i className="fa-solid fa-quote-left" aria-hidden="true" />
+          <span>&ldquo;Honor the Lord with your wealth, with the firstfruits of all your increase.&rdquo; &mdash; Prov. 3:9</span>
         </div>
+
+        <p className="mpesa-card-note">
+          Enter <strong>{current.account}</strong> for {current.label.toLowerCase()}, or <strong>802200#OFFERING</strong> for general offerings.
+          <span className="mpesa-optional-name"> Optional: append your name (e.g. <code>{current.account}#YourName</code>).</span>
+        </p>
       </div>
     );
   }
@@ -177,7 +178,7 @@ export default function MpesaGiving({ variant = "card", className = "" }) {
         <div>
           <dt>Paybill</dt>
           <dd>
-            247247
+            <span>247247</span>
             <button
               type="button"
               className="mpesa-copy-mini"
@@ -191,7 +192,7 @@ export default function MpesaGiving({ variant = "card", className = "" }) {
         <div>
           <dt>Account</dt>
           <dd className="mpesa-card-account-dd">
-            802200#TITHE
+            <span className="mpesa-account-code">802200#TITHE</span>
             <button
               type="button"
               className="mpesa-copy-mini"

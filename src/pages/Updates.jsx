@@ -39,7 +39,10 @@ export default function Updates() {
       .order("pinned", { ascending: false })
       .order("published_at", { ascending: false })
       .then(({ data }) => {
-        if (!data?.length) return;
+        if (!data || data.length === 0) {
+          setNoticeList([]);
+          return;
+        }
         setNoticeList(data.map((item) => ({
           ...item,
           department: item.department.replaceAll("_", " ").replace(/\b\w/g, (letter) => letter.toUpperCase()),
@@ -49,6 +52,9 @@ export default function Updates() {
           image_url: item.image_url || "",
           video_url: item.video_url || "",
         })));
+      })
+      .catch(() => {
+        setNoticeList([]);
       });
 
     void loadNotices();
@@ -80,29 +86,41 @@ export default function Updates() {
           {updateDepartments.map((item) => <button key={item} className={department === item ? "active" : ""} type="button" aria-pressed={department === item} onClick={() => setDepartment(item)}>{item}</button>)}
         </div>
         <div className="updates-list">
-          {visibleUpdates.map((item) => <article className={`update-card ${item.image_url || item.video_url ? "has-media" : ""}`} key={item.id}>
-            <div className="update-card-topline">
-              <span className="update-icon" style={{ backgroundColor: item.accent }}><i className={`fa-solid ${item.icon}`} aria-hidden="true" /></span>
-              <span className="update-department">{item.department}</span>
-              {item.pinned && <span className="update-pinned">Pinned</span>}
+          {visibleUpdates.length === 0 ? (
+            <div className="updates-empty-state" style={{ textAlign: "center", padding: "48px 20px", gridColumn: "1 / -1", background: "var(--surface)", border: "1px solid var(--line)", borderRadius: "16px" }}>
+              <i className="fa-solid fa-bullhorn" style={{ fontSize: "2rem", color: "var(--gold)", marginBottom: "12px", display: "inline-block" }} aria-hidden="true" />
+              <h3 style={{ fontFamily: "var(--font-serif)", fontSize: "1.3rem", color: "var(--forest-deep)", marginBottom: "8px" }}>No Bulletins at this Time</h3>
+              <p style={{ color: "var(--ink-soft)", maxWidth: "460px", margin: "0 auto", fontSize: "0.92rem", lineHeight: "1.5" }}>
+                {department === "All"
+                  ? "Official church notices, department updates, and event announcements will be posted here as they are published."
+                  : `No bulletins currently posted for ${department}. Check back soon or select "All" for church-wide updates.`}
+              </p>
             </div>
-            {item.image_url ? (
-              <div className="update-image-wrap">
-                <img
-                  src={item.image_url}
-                  alt={item.title}
-                  className="update-image"
-                  loading="lazy"
-                />
+          ) : (
+            visibleUpdates.map((item) => <article className={`update-card ${item.image_url || item.video_url ? "has-media" : ""}`} key={item.id}>
+              <div className="update-card-topline">
+                <span className="update-icon" style={{ backgroundColor: item.accent }}><i className={`fa-solid ${item.icon}`} aria-hidden="true" /></span>
+                <span className="update-department">{item.department}</span>
+                {item.pinned && <span className="update-pinned">Pinned</span>}
               </div>
-            ) : null}
-            <h3>{item.title}</h3>
-            <p>{item.description}</p>
-            {item.video_url ? (
-              <MediaVideoPlayer url={item.video_url} title={item.title} />
-            ) : null}
-            <small>{item.date}</small>
-          </article>)}
+              {item.image_url ? (
+                <div className="update-image-wrap">
+                  <img
+                    src={item.image_url}
+                    alt={item.title}
+                    className="update-image"
+                    loading="lazy"
+                  />
+                </div>
+              ) : null}
+              <h3>{item.title}</h3>
+              <p>{item.description}</p>
+              {item.video_url ? (
+                <MediaVideoPlayer url={item.video_url} title={item.title} />
+              ) : null}
+              <small>{item.date}</small>
+            </article>)
+          )}
         </div>
       </section>
     </div>

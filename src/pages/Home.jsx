@@ -2,7 +2,7 @@ import React, { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import MpesaGiving from "../components/MpesaGiving";
 import { getNextServiceInfo } from "../lib/services";
-import { updates } from "../data/updates";
+import { isSupabaseConfigured, supabase } from "../lib/supabase";
 import "./Home.css";
 
 const serviceSchedules = [
@@ -94,33 +94,6 @@ const churchPillars = [
   },
 ];
 
-const spotlightSermons = [
-  {
-    title: "Rooted in Faith, Established in Grace",
-    speaker: "AIC Hola Pulpit Ministry",
-    scripture: "Colossians 2:6–7",
-    desc: "Walking steadfastly in Christ with thanksgiving.",
-    type: "Sunday Message",
-    accent: "#dfb86a",
-  },
-  {
-    title: "Walking in Faith Through Every Season",
-    speaker: "AIC Hola Pulpit Ministry",
-    scripture: "Hebrews 11:1–6",
-    desc: "Trusting God's promises through life's trials.",
-    type: "Expository Sermon",
-    accent: "#a9c8af",
-  },
-  {
-    title: "The Power of Intercessory Prayer",
-    speaker: "AIC Hola Pastoral Team",
-    scripture: "James 5:16–18",
-    desc: "United prayer within the body of Christ.",
-    type: "Midweek Teaching",
-    accent: "#b9c8e8",
-  },
-];
-
 export default function Home() {
   const [prayerModalOpen, setPrayerModalOpen] = useState(false);
   const [prayerFormData, setPrayerFormData] = useState({
@@ -131,12 +104,52 @@ export default function Home() {
   });
   const [submittedPrayer, setSubmittedPrayer] = useState(false);
   const [serviceInfo, setServiceInfo] = useState(getNextServiceInfo());
+  const [recentNotices, setRecentNotices] = useState([]);
+  const [homeSermons, setHomeSermons] = useState([]);
 
   useEffect(() => {
     const timer = setInterval(() => {
       setServiceInfo(getNextServiceInfo());
     }, 1000);
     return () => clearInterval(timer);
+  }, []);
+
+  useEffect(() => {
+    if (!isSupabaseConfigured) return;
+
+    // Load recent notices
+    supabase
+      .from("notices")
+      .select("id,department,title,description,published_at")
+      .order("pinned", { ascending: false })
+      .order("published_at", { ascending: false })
+      .limit(2)
+      .then(({ data }) => {
+        if (data && data.length > 0) {
+          setRecentNotices(
+            data.map((item) => ({
+              ...item,
+              department: item.department.replaceAll("_", " ").replace(/\b\w/g, (c) => c.toUpperCase()),
+              date: new Intl.DateTimeFormat(undefined, { dateStyle: "medium" }).format(new Date(item.published_at)),
+            }))
+          );
+        }
+      })
+      .catch(() => {});
+
+    // Load recent sermons
+    supabase
+      .from("sermons")
+      .select("id,title,preacher,scripture,description,series,accent_color,service_date")
+      .eq("is_published", true)
+      .order("service_date", { ascending: false })
+      .limit(3)
+      .then(({ data }) => {
+        if (data && data.length > 0) {
+          setHomeSermons(data);
+        }
+      })
+      .catch(() => {});
   }, []);
 
   useEffect(() => {
@@ -191,6 +204,7 @@ export default function Home() {
 
       {/* Hero */}
       <section className="home-hero-editorial" aria-label="Hero">
+        <div className="hero-aerial-backdrop" aria-hidden="true" />
         <div className="hero-backdrop-glow" aria-hidden="true" />
         <div className="hero-columns">
           <div className="hero-content">
@@ -554,26 +568,54 @@ export default function Home() {
         </div>
 
         <div className="sermons-spotlight-grid">
-          {spotlightSermons.map((sermon) => (
-            <article key={sermon.title} className="sermon-card-flagship">
+          {homeSermons.length > 0 ? (
+            homeSermons.map((sermon) => (
+              <article key={sermon.id || sermon.title} className="sermon-card-flagship">
+                <div className="sermon-card-header">
+                  <span className="sermon-type-tag" style={{ color: sermon.accent_color || "#dfb86a" }}>
+                    <i className="fa-solid fa-book-bible" aria-hidden="true" /> {sermon.series || "Pulpit Message"}
+                  </span>
+                  <span className="sermon-scripture-ref">{sermon.scripture || sermon.service_date}</span>
+                </div>
+                <h3 className="sermon-card-title">{sermon.title}</h3>
+                <p className="sermon-card-desc">{sermon.description}</p>
+                <div className="sermon-card-footer">
+                  <span className="sermon-speaker">
+                    <i className="fa-solid fa-user-tie" aria-hidden="true" /> {sermon.preacher}
+                  </span>
+                  <Link to="/sermons" className="sermon-card-action">
+                    Listen / Watch <i className="fa-solid fa-chevron-right" aria-hidden="true" />
+                  </Link>
+                </div>
+              </article>
+            ))
+          ) : (
+            <article className="sermon-card-flagship" style={{ gridColumn: "1 / -1", maxWidth: "680px", margin: "0 auto", textAlign: "left" }}>
               <div className="sermon-card-header">
-                <span className="sermon-type-tag" style={{ color: sermon.accent }}>
-                  <i className="fa-solid fa-book-bible" aria-hidden="true" /> {sermon.type}
+                <span className="sermon-type-tag" style={{ color: "#dfb86a" }}>
+                  <i className="fa-solid fa-book-bible" aria-hidden="true" /> Pulpit Ministry
                 </span>
-                <span className="sermon-scripture-ref">{sermon.scripture}</span>
+                <span className="sermon-scripture-ref">Hola Church</span>
               </div>
-              <h3 className="sermon-card-title">{sermon.title}</h3>
-              <p className="sermon-card-desc">{sermon.desc}</p>
+              <h3 className="sermon-card-title">Expository Preaching &amp; Worship Recordings</h3>
+              <p className="sermon-card-desc">
+                Faithful biblical teaching from our pastoral pulpit. Watch full Sunday divine services, choral worship anthems, and expository sermons on our official YouTube channel.
+              </p>
               <div className="sermon-card-footer">
                 <span className="sermon-speaker">
-                  <i className="fa-solid fa-user-tie" aria-hidden="true" /> {sermon.speaker}
+                  <i className="fa-solid fa-church" aria-hidden="true" /> Pastoral Ministry
                 </span>
-                <Link to="/sermons" className="sermon-card-action">
-                  Listen / Watch <i className="fa-solid fa-chevron-right" aria-hidden="true" />
-                </Link>
+                <a
+                  href="https://www.youtube.com/@nkandi242"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="sermon-card-action"
+                >
+                  Watch on YouTube <i className="fa-solid fa-arrow-up-right-from-square" aria-hidden="true" />
+                </a>
               </div>
             </article>
-          ))}
+          )}
         </div>
       </section>
 
@@ -622,19 +664,33 @@ export default function Home() {
           </Link>
         </div>
         <div className="updates-grid-preview">
-          {updates.slice(0, 2).map((item) => (
-            <article key={item.id} className="home-update-preview">
+          {recentNotices.length > 0 ? (
+            recentNotices.map((item) => (
+              <article key={item.id} className="home-update-preview">
+                <div className="update-preview-header">
+                  <span className="update-preview-department">{item.department}</span>
+                  <span className="update-preview-date">{item.date}</span>
+                </div>
+                <h3>{item.title}</h3>
+                <p>{item.description}</p>
+                <Link className="text-link" to="/updates">
+                  Read full announcement <span aria-hidden="true">&rarr;</span>
+                </Link>
+              </article>
+            ))
+          ) : (
+            <article className="home-update-preview" style={{ gridColumn: "1 / -1", maxWidth: "680px", margin: "0 auto" }}>
               <div className="update-preview-header">
-                <span className="update-preview-department">{item.department}</span>
-                <span className="update-preview-date">{item.date}</span>
+                <span className="update-preview-department">Church Office</span>
+                <span className="update-preview-date">Official Noticeboard</span>
               </div>
-              <h3>{item.title}</h3>
-              <p>{item.description}</p>
+              <h3>Welcome to AIC Hola Church</h3>
+              <p>Weekly bulletins, department announcements, and ministry plans will appear here as they are published by church leaders.</p>
               <Link className="text-link" to="/updates">
-                Read full announcement <span aria-hidden="true">&rarr;</span>
+                Open church noticeboard <span aria-hidden="true">&rarr;</span>
               </Link>
             </article>
-          ))}
+          )}
         </div>
       </section>
 

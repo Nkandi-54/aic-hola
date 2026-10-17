@@ -89,73 +89,101 @@
 }
 .mpesa-card-details {
   display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 12px;
-  margin: 16px 0 0;
+  grid-template-columns: 0.9fr 1.1fr;
+  gap: 10px;
+  margin: 14px 0 0;
 }
 .mpesa-card-details > div {
-  padding: 12px 14px;
+  padding: 10px 10px;
   background: rgba(76, 175, 80, 0.07);
   border: 1px solid rgba(76, 175, 80, 0.2);
-  border-radius: 12px;
+  border-radius: 10px;
+  min-width: 0;
 }
 .mpesa-card-details dt {
   color: var(--muted);
-  font-size: 0.66rem;
+  font-size: 0.62rem;
   font-weight: 800;
-  letter-spacing: 0.1em;
+  letter-spacing: 0.08em;
   text-transform: uppercase;
 }
 .mpesa-card-details dd {
-  margin: 5px 0 0;
+  margin: 4px 0 0;
   color: var(--forest-deep);
   font-family: var(--font-serif);
-  font-size: 1.4rem;
+  font-size: 1.05rem;
   font-weight: 700;
-  letter-spacing: 0.02em;
+  letter-spacing: 0;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 4px;
+}
+.mpesa-card-account-dd {
+  font-size: 0.88rem !important;
+  white-space: nowrap !important;
+  word-break: normal !important;
+}
+.mpesa-account-code {
+  white-space: nowrap;
+  letter-spacing: -0.01em;
 }
 .mpesa-scripture-ribbon {
   display: flex;
-  align-items: center;
-  gap: 8px;
-  margin-top: 14px;
-  padding: 8px 12px;
+  align-items: flex-start;
+  gap: 7px;
+  margin-top: 12px;
+  padding: 7px 10px;
   background: rgba(223, 184, 106, 0.12);
   border: 1px solid rgba(223, 184, 106, 0.28);
   border-radius: 8px;
-  font-size: 0.76rem;
+  font-size: 0.72rem;
   font-style: italic;
   color: var(--forest-deep);
-  line-height: 1.4;
+  line-height: 1.35;
 }
 .mpesa-scripture-ribbon i {
   color: var(--gold);
-  font-size: 0.72rem;
+  font-size: 0.7rem;
+  margin-top: 2px;
   flex-shrink: 0;
 }
 .mpesa-card-note {
   margin: 10px 0 0;
-  color: var(--muted);
-  font-size: 0.78rem;
-  line-height: 1.5;
+  color: #5c4d41;
+  font-size: 0.74rem;
+  line-height: 1.45;
+}
+.mpesa-optional-name {
+  color: #7a6e62;
+  font-size: 0.72rem;
+}
+.mpesa-optional-name code {
+  background: rgba(20, 56, 41, 0.08);
+  padding: 1px 4px;
+  border-radius: 4px;
+  font-family: inherit;
+  font-weight: 700;
+  color: var(--forest-deep);
 }
 
 .mpesa-copy-mini {
-  margin-left: 8px;
+  margin-left: 4px;
   background: transparent;
-  border: 1px solid var(--line, #e6dcce);
-  border-radius: 6px;
-  padding: 3px 6px;
+  border: 1px solid rgba(20, 56, 41, 0.2);
+  border-radius: 5px;
+  padding: 2px 5px;
   cursor: pointer;
-  color: var(--muted);
-  font-size: 0.75rem;
+  color: var(--forest);
+  font-size: 0.68rem;
   transition: all 180ms ease;
+  flex-shrink: 0;
 }
 
 .mpesa-copy-mini:hover {
   color: var(--forest);
   border-color: var(--gold);
-  background: rgba(212, 175, 55, 0.1);
+  background: rgba(212, 175, 55, 0.15);
 }
 
 /* --- Giving Hub: grand home page stewardship block ----------------------- */
@@ -343,10 +371,6 @@
   font-family: inherit;
 }
 
-.mpesa-card-account-dd {
-  font-size: clamp(1rem, 2vw, 1.25rem) !important;
-  word-break: break-all;
-}
 
 @media (max-width: 640px) {
   .mpesa-hub {

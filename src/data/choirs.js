@@ -13,11 +13,6 @@ const choirs = [
         type: "video",
         url: "https://www.youtube.com/@nkandi242",
       },
-      {
-        title: "Voices of Hope",
-        description: "Songs of encouragement and faith.",
-        type: "audio",
-      },
     ],
   },
   {
@@ -33,11 +28,6 @@ const choirs = [
         description: "Worship in motion.",
         type: "video",
         url: "https://www.youtube.com/@nkandi242",
-      },
-      {
-        title: "Praise Audio",
-        description: "Spirit-filled worship session.",
-        type: "audio",
       },
     ],
   },
@@ -55,11 +45,6 @@ const choirs = [
         type: "video",
         url: "https://www.youtube.com/@nkandi242",
       },
-      {
-        title: "Worship Moment",
-        description: "A call to devotion.",
-        type: "audio",
-      },
     ],
   },
   {
@@ -75,11 +60,6 @@ const choirs = [
         description: "Children praising with joy.",
         type: "video",
         url: "https://www.youtube.com/@nkandi242",
-      },
-      {
-        title: "Scripture in Song",
-        description: "Memory verses in music.",
-        type: "audio",
       },
     ],
   },

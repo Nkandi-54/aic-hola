@@ -6,7 +6,6 @@ import "./Contacts.css";
 const contactInfo = {
   email: "contacts@aichola.org",
   phone: "+254 727 175 730",
-  altPhone: "+254 700 000 000",
   postal: "P.O. Box 24 – 70101, Hola, Kenya",
   location: "AIC Hola Church, Hola Town, Tana River County, Kenya",
   maps: "https://maps.google.com/?q=AIC+Hola+Church",
@@ -199,7 +198,7 @@ export default function Contacts() {
                       name="email"
                       value={formData.email}
                       onChange={handleChange}
-                      placeholder="e.g. baraka@example.com"
+                      placeholder="e.g. baraka@email.com"
                       aria-invalid={Boolean(errors.email)}
                     />
                     {errors.email && <small className="form-error">{errors.email}</small>}
