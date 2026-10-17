@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { Link, useLocation } from "react-router-dom";
 import { getNextServiceInfo } from "../lib/services";
+import { GIVING_CATEGORIES, useChurchSettings } from "../lib/church";
 import "./MobileQuickDock.css";
 
 export default function MobileQuickDock() {
@@ -8,6 +9,10 @@ export default function MobileQuickDock() {
   const [giveSheetOpen, setGiveSheetOpen] = useState(false);
   const [copiedField, setCopiedField] = useState(null);
   const [serviceInfo, setServiceInfo] = useState(() => getNextServiceInfo());
+  const settings = useChurchSettings();
+
+  const paybill = settings.paybill;
+  const account = settings.paybill_account;
 
   useEffect(() => {
     const timer = setInterval(() => {
@@ -103,7 +108,7 @@ export default function MobileQuickDock() {
             aria-labelledby="mqd-sheet-title"
           >
             <div className="mqd-sheet-handle" />
-            
+
             <div className="mqd-sheet-header">
               <div>
                 <span className="mqd-sheet-kicker">Lipa na M-PESA</span>
@@ -123,13 +128,13 @@ export default function MobileQuickDock() {
               <div className="mqd-give-card">
                 <div className="mqd-card-meta">
                   <span className="mqd-card-label">Paybill Number</span>
-                  <strong className="mqd-card-val">247247</strong>
-                  <small>Equity Paybill · AIC Hola</small>
+                  <strong className="mqd-card-val">{paybill}</strong>
+                  <small>Official AIC Hola Paybill</small>
                 </div>
                 <button
                   type="button"
                   className="mqd-copy-btn"
-                  onClick={() => copyToClipboard("247247", "paybill")}
+                  onClick={() => copyToClipboard(paybill, "paybill")}
                 >
                   <i className={`fa-solid ${copiedField === "paybill" ? "fa-check" : "fa-copy"}`} />
                   {copiedField === "paybill" ? "Copied" : "Copy"}
@@ -138,35 +143,29 @@ export default function MobileQuickDock() {
 
               <div className="mqd-give-card">
                 <div className="mqd-card-meta">
-                  <span className="mqd-card-label">Tithe Account</span>
-                  <strong className="mqd-card-val">802200#TITHE</strong>
-                  <small>Use #TITHE (or #TITHE#YourName)</small>
+                  <span className="mqd-card-label">Account Number</span>
+                  <strong className="mqd-card-val">{account}</strong>
+                  <small>Use for every tithe, offering and gift</small>
                 </div>
                 <button
                   type="button"
                   className="mqd-copy-btn"
-                  onClick={() => copyToClipboard("802200#TITHE", "tithe")}
+                  onClick={() => copyToClipboard(account, "account")}
                 >
-                  <i className={`fa-solid ${copiedField === "tithe" ? "fa-check" : "fa-copy"}`} />
-                  {copiedField === "tithe" ? "Copied" : "Copy"}
+                  <i className={`fa-solid ${copiedField === "account" ? "fa-check" : "fa-copy"}`} />
+                  {copiedField === "account" ? "Copied" : "Copy"}
                 </button>
               </div>
 
-              <div className="mqd-give-card">
-                <div className="mqd-card-meta">
-                  <span className="mqd-card-label">General Offering</span>
-                  <strong className="mqd-card-val">802200#OFFERING</strong>
-                  <small>Sunday offertory & thanksgiving</small>
+              {GIVING_CATEGORIES.slice(0, 4).map((cat) => (
+                <div className="mqd-give-card" key={cat.key}>
+                  <div className="mqd-card-meta">
+                    <span className="mqd-card-label">{cat.label}</span>
+                    <strong className="mqd-card-val">{cat.purpose}</strong>
+                    <small>State this as the purpose of your gift</small>
+                  </div>
                 </div>
-                <button
-                  type="button"
-                  className="mqd-copy-btn"
-                  onClick={() => copyToClipboard("802200#OFFERING", "offering")}
-                >
-                  <i className={`fa-solid ${copiedField === "offering" ? "fa-check" : "fa-copy"}`} />
-                  {copiedField === "offering" ? "Copied" : "Copy"}
-                </button>
-              </div>
+              ))}
             </div>
 
             <div className="mqd-sheet-footer">

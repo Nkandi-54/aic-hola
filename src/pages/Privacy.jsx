@@ -33,7 +33,7 @@ function Privacy() {
             <li><strong>Account Credentials:</strong> Full name and email address when you register an account. Passwords are salted, hashed, and managed through Supabase Auth.</li>
             <li><strong>Fellowship Communications:</strong> Private direct messages exchanged between verified members to support pastoral dialogue and departmental meetings.</li>
             <li><strong>Device Tokens & Preferences:</strong> Anonymous push notification tokens and preferences (notices, live broadcasts, messages) to deliver alerts you explicitly opt in to receive.</li>
-            <li><strong>No Financial Credentials Stored:</strong> M-Pesa paybill numbers (Paybill 247247, Account 802200) are displayed for voluntary religious tithes and offerings. We never request, process, or store your M-Pesa PIN, bank account numbers, or card details.</li>
+            <li><strong>No Financial Credentials Stored:</strong> M-PESA paybill numbers (Paybill 542542, Account 01410637946150) are displayed for voluntary religious tithes and offerings. We never request, process, or store your M-Pesa PIN, bank account numbers, or card details.</li>
           </ul>
         </section>
 

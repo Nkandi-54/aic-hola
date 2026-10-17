@@ -42,15 +42,13 @@ export default function Account() {
     }
 
     try {
-      const listFn =
-        (supabase.auth.passkey && supabase.auth.passkey.list) ||
-        supabase.auth.listPasskeys;
-
-      if (typeof listFn === "function") {
-        const { data, error } = await listFn.call(
-          supabase.auth.passkey || supabase.auth
-        );
-
+      if (supabase.auth?.passkey?.list && typeof supabase.auth.passkey.list === "function") {
+        const { data, error } = await supabase.auth.passkey.list();
+        if (!error && Array.isArray(data)) {
+          setPasskeyCount(data.length);
+        }
+      } else if (typeof supabase.auth?._listPasskeys === "function") {
+        const { data, error } = await supabase.auth._listPasskeys();
         if (!error && Array.isArray(data)) {
           setPasskeyCount(data.length);
         }
@@ -222,11 +220,25 @@ export default function Account() {
 
   const formatPasskeyError = (error) => {
     const msg = error?.message || "";
+    const name = error?.name || "";
+
+    if (
+      name === "NotAllowedError" ||
+      msg.toLowerCase().includes("timed out") ||
+      msg.toLowerCase().includes("not allowed")
+    ) {
+      return "Passkey prompt was cancelled or timed out.";
+    }
+
+    if (name === "InvalidStateError") {
+      return "This passkey has already been registered on your account.";
+    }
+
     if (
       msg.toLowerCase().includes("relying party") ||
       msg.toLowerCase().includes("origin") ||
       msg.toLowerCase().includes("securityerror") ||
-      error?.name === "SecurityError"
+      name === "SecurityError"
     ) {
       const currentHost =
         typeof window !== "undefined"
@@ -234,6 +246,16 @@ export default function Account() {
           : "this domain";
       return `Passkey domain mismatch: The authentication server's WebAuthn Relying Party ID is set to localhost. To enable passkeys on ${currentHost}, update the Site URL in Supabase Dashboard (Authentication > URL Configuration) to https://${currentHost}.`;
     }
+
+    if (
+      msg.toLowerCase().includes("no passkey") ||
+      msg.toLowerCase().includes("ceremony failed") ||
+      msg.toLowerCase().includes("credential not found") ||
+      msg.toLowerCase().includes("user not found")
+    ) {
+      return "No matching passkey found on this device. If you haven't added a passkey yet, sign in with your password first, then click 'Add a passkey' in your profile.";
+    }
+
     return (
       msg || "Passkey operation was cancelled or could not be completed."
     );
@@ -256,13 +278,12 @@ export default function Account() {
     setMessage("");
 
     try {
-      const authMethod =
-        (supabase.auth.passkey && supabase.auth.passkey.authenticate) ||
-        supabase.auth.signInWithPasskey;
+      if (typeof supabase.auth?.signInWithPasskey !== "function") {
+        setMessage("Passkey authentication is not available on this client.");
+        return;
+      }
 
-      const { error } = await authMethod.call(
-        supabase.auth.passkey || supabase.auth
-      );
+      const { error } = await supabase.auth.signInWithPasskey();
 
       if (error) {
         setMessage(formatPasskeyError(error));
@@ -295,13 +316,12 @@ export default function Account() {
     setMessage("");
 
     try {
-      const regMethod =
-        (supabase.auth.passkey && supabase.auth.passkey.register) ||
-        supabase.auth.registerPasskey;
+      if (typeof supabase.auth?.registerPasskey !== "function") {
+        setMessage("Passkey registration is not available on this client.");
+        return;
+      }
 
-      const { error } = await regMethod.call(
-        supabase.auth.passkey || supabase.auth
-      );
+      const { error } = await supabase.auth.registerPasskey();
 
       if (error) {
         setMessage(formatPasskeyError(error));

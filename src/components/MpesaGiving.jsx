@@ -1,8 +1,13 @@
 import React, { useState } from "react";
+import { GIVING_CATEGORIES, useChurchSettings } from "../lib/church";
 import "./MpesaGiving.css";
 
 /**
  * "Lipa na M-PESA" giving details for offerings made via mobile money.
+ *
+ * The paybill and account number come from the church's real settings
+ * (src/lib/church.js → public.church_settings), so the website, the mobile app
+ * and the church books always quote the same official details.
  *
  * `variant`:
  *   "footer" — a single compact block sized to sit beside the church brand in
@@ -13,6 +18,10 @@ import "./MpesaGiving.css";
 export default function MpesaGiving({ variant = "card", className = "" }) {
   const [copiedField, setCopiedField] = useState(null);
   const [activeCategory, setActiveCategory] = useState("tithe");
+  const settings = useChurchSettings();
+
+  const paybill = settings.paybill;
+  const account = settings.paybill_account;
 
   const copyToClipboard = (text, field) => {
     if (navigator?.clipboard?.writeText) {
@@ -30,6 +39,21 @@ export default function MpesaGiving({ variant = "card", className = "" }) {
     </span>
   );
 
+  const copyButton = (value, field, title) => (
+    <button
+      type="button"
+      className="mpesa-copy-btn"
+      title={title}
+      onClick={() => copyToClipboard(value, field)}
+    >
+      <i
+        className={`fa-solid ${copiedField === field ? "fa-check" : "fa-copy"}`}
+        aria-hidden="true"
+      />
+      <span>{copiedField === field ? "Copied" : "Copy"}</span>
+    </button>
+  );
+
   if (variant === "footer") {
     return (
       <div className={`mpesa-footer ${className}`.trim()}>
@@ -38,61 +62,22 @@ export default function MpesaGiving({ variant = "card", className = "" }) {
           <span className="mpesa-footer-tag">Lipa na M-PESA</span>
         </span>
         <span className="mpesa-footer-details">
-          <span>Paybill <strong>247247</strong></span>
+          <span>
+            Paybill <strong>{paybill}</strong>
+          </span>
           <span className="mpesa-sep" aria-hidden="true">·</span>
-          <span>Account <strong>802200#TITHE / #OFFERING</strong></span>
+          <span>
+            Account <strong>{account}</strong>
+          </span>
         </span>
       </div>
     );
   }
 
   if (variant === "hub") {
-    const categories = [
-      {
-        key: "tithe",
-        label: "Tithe",
-        account: "802200#TITHE",
-        purpose: "Tithe (10% Firstfruits)",
-        note: "Enter '802200#TITHE' in Account Number (or '802200#TITHE#YourName')",
-      },
-      {
-        key: "offering",
-        label: "General Offering",
-        account: "802200#OFFERING",
-        purpose: "Sunday & Midweek Offertory",
-        note: "Enter '802200#OFFERING' in Account Number",
-      },
-      {
-        key: "building",
-        label: "Church Building",
-        account: "802200#BUILDING",
-        purpose: "Cathedral Development & Maintenance",
-        note: "Enter '802200#BUILDING' in Account Number",
-      },
-      {
-        key: "missions",
-        label: "Missions & Outreach",
-        account: "802200#MISSIONS",
-        purpose: "Evangelism & Regional Mission Fields",
-        note: "Enter '802200#MISSIONS' in Account Number",
-      },
-      {
-        key: "benevolence",
-        label: "Needy & Benevolence",
-        account: "802200#NEEDY",
-        purpose: "Compassion Ministry & Vulnerable Families",
-        note: "Enter '802200#NEEDY' in Account Number",
-      },
-      {
-        key: "thanksgiving",
-        label: "Thanksgiving",
-        account: "802200#THANKSGIVING",
-        purpose: "Special Praise & Thanksgiving Giving",
-        note: "Enter '802200#THANKSGIVING' in Account Number",
-      },
-    ];
-
-    const current = categories.find((c) => c.key === activeCategory) || categories[0];
+    const current =
+      GIVING_CATEGORIES.find((c) => c.key === activeCategory) ||
+      GIVING_CATEGORIES[0];
 
     return (
       <div className={`mpesa-hub ${className}`.trim()} aria-label="Church Giving Hub">
@@ -101,12 +86,15 @@ export default function MpesaGiving({ variant = "card", className = "" }) {
             {wordmark}
             <span className="mpesa-hub-badge">LIPA NA M-PESA</span>
           </div>
-          <span className="mpesa-hub-subtitle">Official Church Paybill &bull; Equity Bank</span>
+          <span className="mpesa-hub-subtitle">
+            Official Church Paybill
+            {settings.bank_name ? ` • ${settings.bank_name}` : ""}
+          </span>
         </div>
 
         {/* Giving Category Selector */}
         <div className="mpesa-hub-tabs" role="tablist">
-          {categories.map((cat) => (
+          {GIVING_CATEGORIES.map((cat) => (
             <button
               key={cat.key}
               type="button"
@@ -125,32 +113,16 @@ export default function MpesaGiving({ variant = "card", className = "" }) {
           <div className="mpesa-hub-box">
             <span className="mpesa-hub-label">PAYBILL</span>
             <div className="mpesa-hub-value-row">
-              <strong className="mpesa-hub-value">247247</strong>
-              <button
-                type="button"
-                className="mpesa-copy-btn"
-                title="Copy Paybill Number"
-                onClick={() => copyToClipboard("247247", "paybill")}
-              >
-                <i className={`fa-solid ${copiedField === "paybill" ? "fa-check" : "fa-copy"}`} aria-hidden="true" />
-                <span>{copiedField === "paybill" ? "Copied" : "Copy"}</span>
-              </button>
+              <strong className="mpesa-hub-value">{paybill}</strong>
+              {copyButton(paybill, "paybill", "Copy Paybill Number")}
             </div>
           </div>
 
           <div className="mpesa-hub-box">
             <span className="mpesa-hub-label">ACCOUNT</span>
             <div className="mpesa-hub-value-row">
-              <strong className="mpesa-hub-value">{current.account}</strong>
-              <button
-                type="button"
-                className="mpesa-copy-btn"
-                title="Copy Account Number"
-                onClick={() => copyToClipboard(current.account, "account")}
-              >
-                <i className={`fa-solid ${copiedField === "account" ? "fa-check" : "fa-copy"}`} aria-hidden="true" />
-                <span>{copiedField === "account" ? "Copied" : "Copy"}</span>
-              </button>
+              <strong className="mpesa-hub-value">{account}</strong>
+              {copyButton(account, "account", "Copy Account Number")}
             </div>
           </div>
         </div>
@@ -161,8 +133,11 @@ export default function MpesaGiving({ variant = "card", className = "" }) {
         </div>
 
         <p className="mpesa-card-note">
-          Enter <strong>{current.account}</strong> for {current.label.toLowerCase()}, or <strong>802200#OFFERING</strong> for general offerings.
-          <span className="mpesa-optional-name"> Optional: append your name (e.g. <code>{current.account}#YourName</code>).</span>
+          On your phone: <strong>M-PESA &rarr; Lipa na M-PESA &rarr; Pay Bill</strong>.
+          Enter Paybill <strong>{paybill}</strong>, Account <strong>{account}</strong>,
+          then the amount for your <strong>{current.label.toLowerCase()}</strong> (
+          {current.purpose}). Every category is paid to the same official church
+          account.
         </p>
       </div>
     );
@@ -178,12 +153,12 @@ export default function MpesaGiving({ variant = "card", className = "" }) {
         <div>
           <dt>Paybill</dt>
           <dd>
-            <span>247247</span>
+            <span>{paybill}</span>
             <button
               type="button"
               className="mpesa-copy-mini"
               title="Copy Paybill"
-              onClick={() => copyToClipboard("247247", "card-paybill")}
+              onClick={() => copyToClipboard(paybill, "card-paybill")}
             >
               <i className={`fa-solid ${copiedField === "card-paybill" ? "fa-check" : "fa-copy"}`} />
             </button>
@@ -192,12 +167,12 @@ export default function MpesaGiving({ variant = "card", className = "" }) {
         <div>
           <dt>Account</dt>
           <dd className="mpesa-card-account-dd">
-            <span className="mpesa-account-code">802200#TITHE</span>
+            <span className="mpesa-account-code">{account}</span>
             <button
               type="button"
               className="mpesa-copy-mini"
-              title="Copy Tithe Account"
-              onClick={() => copyToClipboard("802200#TITHE", "card-account")}
+              title="Copy Account Number"
+              onClick={() => copyToClipboard(account, "card-account")}
             >
               <i className={`fa-solid ${copiedField === "card-account" ? "fa-check" : "fa-copy"}`} />
             </button>
@@ -209,7 +184,9 @@ export default function MpesaGiving({ variant = "card", className = "" }) {
         <span>&ldquo;Honor the Lord with your wealth, with the firstfruits of all your increase.&rdquo; &mdash; Prov. 3:9</span>
       </div>
       <p className="mpesa-card-note">
-        Enter <strong>802200#TITHE</strong> for tithes, or <strong>802200#OFFERING</strong> for general offerings.
+        Enter Paybill <strong>{paybill}</strong> and Account{" "}
+        <strong>{account}</strong> for tithes, offerings, building, missions and
+        benevolence. State the purpose of your gift in the M-PESA confirmation.
       </p>
     </section>
   );
