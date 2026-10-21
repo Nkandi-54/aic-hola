@@ -12,8 +12,8 @@ import { isSupabaseConfigured, supabase } from "./supabase";
  * `church_settings` (supabase/schema-11-production-readiness.sql) holds the
  * authoritative copy, which an administrator can update without a redeploy.
  */
-export const CHURCH_PAYBILL = "542542";
-export const CHURCH_PAYBILL_ACCOUNT = "01410637946150";
+export const CHURCH_PAYBILL = "247247";
+export const CHURCH_PAYBILL_ACCOUNT = "802200";
 
 export const CHURCH_CONTACT = {
   email: "contacts@aichola.org",
@@ -72,6 +72,28 @@ export const GIVING_CATEGORIES = [
   },
 ];
 
+const churchSettingsListeners = new Set();
+let churchSettingsChannel = null;
+
+function ensureChurchSettingsChannel() {
+  if (churchSettingsChannel || !isSupabaseConfigured) {
+    return churchSettingsChannel;
+  }
+
+  churchSettingsChannel = supabase
+    .channel("public-church-settings")
+    .on(
+      "postgres_changes",
+      { event: "*", schema: "public", table: "church_settings" },
+      () => {
+        churchSettingsListeners.forEach((listener) => listener());
+      },
+    );
+
+  churchSettingsChannel.subscribe();
+  return churchSettingsChannel;
+}
+
 /**
  * Read the church's live settings. Returns the built-in official values
  * immediately and upgrades them once the database answers, so a slow network
@@ -105,20 +127,23 @@ export function useChurchSettings() {
       }));
     };
 
-    void load();
+    const listener = () => {
+      if (active) {
+        void load();
+      }
+    };
 
-    const channel = supabase
-      .channel("public-church-settings")
-      .on(
-        "postgres_changes",
-        { event: "*", schema: "public", table: "church_settings" },
-        () => void load(),
-      )
-      .subscribe();
+    churchSettingsListeners.add(listener);
+    ensureChurchSettingsChannel();
+    void load();
 
     return () => {
       active = false;
-      void supabase.removeChannel(channel);
+      churchSettingsListeners.delete(listener);
+      if (churchSettingsChannel && churchSettingsListeners.size === 0) {
+        void supabase.removeChannel(churchSettingsChannel);
+        churchSettingsChannel = null;
+      }
     };
   }, []);
 

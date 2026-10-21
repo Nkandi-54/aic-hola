@@ -171,7 +171,7 @@ do $$
 declare
   target text;
 begin
-  foreach target in array['events', 'notices', 'records', 'sermons', 'audio_recordings']
+  foreach target in array array['events', 'notices', 'records', 'sermons', 'audio_recordings']
   loop
     if exists (
       select 1 from information_schema.tables
@@ -213,7 +213,7 @@ do $$
 declare
   target text;
 begin
-  foreach target in array['events', 'notices', 'records', 'sermons', 'audio_recordings']
+  foreach target in array array['events', 'notices', 'records', 'sermons', 'audio_recordings']
   loop
     if exists (
       select 1 from information_schema.tables
@@ -266,7 +266,7 @@ do $$
 declare
   target text;
 begin
-  foreach target in array['events', 'notices', 'records', 'sermons', 'audio_recordings']
+  foreach target in array array['events', 'notices', 'records', 'sermons', 'audio_recordings']
   loop
     if exists (
       select 1 from information_schema.tables
@@ -348,7 +348,7 @@ begin
         on public.sermons for select
         to anon, authenticated
         using (
-          (is_published = true and approval = ''approved'')
+          (is_published = true and approval = 'approved')
           or public.is_overseer()
           or public.can_publish_media()
         )
@@ -364,7 +364,7 @@ begin
         on public.audio_recordings for select
         to anon, authenticated
         using (
-          (is_published = true and approval = ''approved'')
+          (is_published = true and approval = 'approved')
           or public.is_overseer()
           or public.can_publish_media()
         )
@@ -567,8 +567,8 @@ insert into public.church_settings (
 )
 values (
   'primary',
-  '542542',
-  '01410637946150',
+  '247247',
+  '802200',
   'Equity Bank',
   'AIC Hola Church',
   'contacts@aichola.org',
@@ -608,7 +608,7 @@ grant update on public.church_settings to authenticated;
 -- 8. THE OFFICIAL CHURCH BANK ACCOUNT
 -- ============================================================================
 -- Record the real paybill collection account so the treasurer reconciles the
--- money that actually arrives from 542 / 01410637946150.
+-- money that actually arrives from Paybill 247247 / Account 802200.
 
 do $$
 begin
@@ -619,17 +619,32 @@ begin
       bank_name,
       account_number,
       currency,
-      statement_balance
+      statement_balance,
+      created_by
     )
     select
       'AIC Hola M-PESA Paybill Collection',
       'Equity Bank',
-      '01410637946150',
+      '802200',
       'KES',
-      0
+      0,
+      (
+        select id
+        from public.profiles
+        where role = 'admin'
+          and status = 'active'
+        order by created_at
+        limit 1
+      )
     where not exists (
       select 1 from public.bank_accounts
-      where account_number = '01410637946150'
+      where account_number = '802200'
+    )
+    and exists (
+      select 1
+      from public.profiles
+      where role = 'admin'
+        and status = 'active'
     );
   end if;
 end
@@ -642,5 +657,9 @@ $$;
 -- grants so a later migration can never accidentally widen them.
 
 revoke all on function public.enforce_content_approval() from anon;
+
+-- This predicate is intentionally safe for anonymous calls: it only reports
+-- whether the current request is an active media publisher.
+grant execute on function public.can_publish_media() to anon, authenticated;
 
 commit;

@@ -7,11 +7,15 @@ import "./Live.css";
 
 const PLAYLIST_ID = "PLxQiFsFVDeJGSPEKPUGPeypbNRHZbfrCC";
 const PLAYLIST_URL = `https://www.youtube.com/playlist?list=${PLAYLIST_ID}`;
-const PLAYLIST_FEED_URL = `https://www.youtube.com/feeds/videos.xml?playlist_id=${PLAYLIST_ID}`;
 
-const publicUrl = (path) =>
-  supabase.storage.from("worship-audio").getPublicUrl(path).data?.publicUrl || "";
-
+const publicUrl = (path) => {
+  if (!isSupabaseConfigured || !path) return "";
+  try {
+    return supabase.storage.from("worship-audio").getPublicUrl(path).data?.publicUrl || "";
+  } catch {
+    return "";
+  }
+};
 const audioSourceFor = (track) =>
   track?.stream_url || (track?.storage_path ? publicUrl(track.storage_path) : "");
 
@@ -77,24 +81,20 @@ export default function Live() {
   }, []);
 
   useEffect(() => {
-    const checkForNewService = async () => {
-      try {
-        const response = await fetch(PLAYLIST_FEED_URL);
-        const xml = await response.text();
-        const id = xml.match(/<yt:videoId>([^<]+)<\/yt:videoId>/)?.[1];
-        if (id && latestId.current && id !== latestId.current && alertsEnabled && Notification.permission === "granted") {
-          new Notification("AIC Hola is live", { body: "A new church service is ready to watch." });
-        }
-        if (id) latestId.current = id;
-      } catch {
-        // Fallback silently if RSS is blocked by CORS
+    const checkForNewService = () => {
+      if (latestId.current) {
+        return;
+      }
+
+      if (broadcast?.youtube_video_id && alertsEnabled && Notification.permission === "granted") {
+        latestId.current = broadcast.youtube_video_id;
       }
     };
 
     checkForNewService();
     const interval = window.setInterval(checkForNewService, 60_000);
     return () => window.clearInterval(interval);
-  }, [alertsEnabled]);
+  }, [alertsEnabled, broadcast?.youtube_video_id]);
 
   const loadAudio = useCallback(async () => {
     if (!isSupabaseConfigured) return;
@@ -133,16 +133,25 @@ export default function Live() {
 
   useEffect(() => {
     if (!isSupabaseConfigured) return undefined;
-    const channel = supabase
-      .channel("live-page-broadcast-sync")
-      .on(
-        "postgres_changes",
-        { event: "*", schema: "public", table: "broadcast_settings" },
-        () => void loadAudio(),
-      )
-      .subscribe();
+
+    let channel = null;
+    try {
+      channel = supabase
+        .channel("live-page-broadcast-sync")
+        .on(
+          "postgres_changes",
+          { event: "*", schema: "public", table: "broadcast_settings" },
+          () => void loadAudio(),
+        )
+        .subscribe();
+    } catch {
+      channel = null;
+    }
+
     return () => {
-      void supabase.removeChannel(channel);
+      if (channel) {
+        void supabase.removeChannel(channel);
+      }
     };
   }, [loadAudio]);
 

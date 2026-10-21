@@ -58,12 +58,20 @@ export default function Updates() {
       });
 
     void loadNotices();
-    const channel = supabase.channel("public-notices-sync")
-      .on("postgres_changes", { event: "*", schema: "public", table: "notices" }, () => void loadNotices())
-      .subscribe();
+
+    let channel = null;
+    try {
+      channel = supabase.channel("public-notices-sync")
+        .on("postgres_changes", { event: "*", schema: "public", table: "notices" }, () => void loadNotices())
+        .subscribe();
+    } catch {
+      channel = null;
+    }
 
     return () => {
-      void supabase.removeChannel(channel);
+      if (channel) {
+        void supabase.removeChannel(channel);
+      }
     };
   }, []);
 

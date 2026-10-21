@@ -163,22 +163,30 @@ export default function Workspace() {
 
   useEffect(() => {
     if (!isSupabaseConfigured) return undefined;
-    const channel = supabase
-      .channel("workspace-dashboard")
-      .on(
-        "postgres_changes",
-        { event: "*", schema: "public", table: "events" },
-        () => void load(),
-      )
-      .on(
-        "postgres_changes",
-        { event: "*", schema: "public", table: "notices" },
-        () => void load(),
-      )
-      .subscribe();
+
+    let channel = null;
+    try {
+      channel = supabase
+        .channel("workspace-dashboard")
+        .on(
+          "postgres_changes",
+          { event: "*", schema: "public", table: "events" },
+          () => void load(),
+        )
+        .on(
+          "postgres_changes",
+          { event: "*", schema: "public", table: "notices" },
+          () => void load(),
+        )
+        .subscribe();
+    } catch {
+      channel = null;
+    }
 
     return () => {
-      void supabase.removeChannel(channel);
+      if (channel) {
+        void supabase.removeChannel(channel);
+      }
     };
   }, [load]);
 

@@ -176,16 +176,25 @@ export default function Calendar() {
         .catch(() => {});
 
     void loadEvents();
-    const channel = supabase
-      .channel("public-events-sync")
-      .on(
-        "postgres_changes",
-        { event: "*", schema: "public", table: "events" },
-        () => void loadEvents(),
-      )
-      .subscribe();
+
+    let channel = null;
+    try {
+      channel = supabase
+        .channel("public-events-sync")
+        .on(
+          "postgres_changes",
+          { event: "*", schema: "public", table: "events" },
+          () => void loadEvents(),
+        )
+        .subscribe();
+    } catch {
+      channel = null;
+    }
+
     return () => {
-      void supabase.removeChannel(channel);
+      if (channel) {
+        void supabase.removeChannel(channel);
+      }
     };
   }, []);
 

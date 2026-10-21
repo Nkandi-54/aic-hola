@@ -1,5 +1,5 @@
 import React from "react";
-import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
+import { BrowserRouter as Router, Routes, Route, Link } from "react-router-dom";
 import ScrollToTop from "./components/ScrollToTop";
 import Navbar from "./components/Navbar";
 import Footer from "./components/Footer";
@@ -26,7 +26,57 @@ import PastorDesk from "./pages/PastorDesk";
 import Workspace from "./pages/Workspace";
 import Privacy from "./pages/Privacy";
 import NotFound from "./pages/NotFound";
+import { useAuth } from "./lib/auth";
 import "./App.css";
+
+function RequireStaffAccess({ allow, children }) {
+  const auth = useAuth();
+
+  if (auth.loading) {
+    return (
+      <div className="page-shell">
+        <p className="empty-state">Verifying your access…</p>
+      </div>
+    );
+  }
+
+  if (!auth.isAuthenticated || auth.isSuspended || !allow(auth)) {
+    return (
+      <div className="page-shell">
+        <div className="panel gate-card">
+          <span className="badge subtle">
+            {!auth.isAuthenticated ? "Restricted" : "Not assigned"}
+          </span>
+          <h2 className="panel-title">
+            {!auth.isAuthenticated
+              ? "Staff sign-in required"
+              : auth.isSuspended
+                ? "Your account is suspended"
+                : "You don’t have access here yet"}
+          </h2>
+          <p className="panel-sub">
+            {!auth.isAuthenticated
+              ? "Sign in with your church account to access this staff area."
+              : auth.isSuspended
+                ? "Please speak to the church administrator to restore staff access."
+                : "Your account does not have permission to open this staff area."}
+          </p>
+          {!auth.isAuthenticated ? (
+            <Link className="button" to="/account">
+              Go to sign in
+            </Link>
+          ) : (
+            <Link className="button ghost" to="/">
+              Return home
+            </Link>
+          )}
+        </div>
+      </div>
+    );
+  }
+
+  return children;
+}
 
 function App() {
   return (
@@ -51,16 +101,16 @@ function App() {
               <Route path="/account" element={<Account />} />
               <Route path="/reset-password" element={<ResetPassword />} />
 
-              <Route path="/admin" element={<Admin />} />
-              <Route path="/admin/people" element={<Admin initialTab="people" />} />
-              <Route path="/admin/departments" element={<Admin initialTab="heads" />} />
-              <Route path="/admin/invitations" element={<Admin initialTab="invite" />} />
-              <Route path="/workspace" element={<Workspace />} />
-              <Route path="/manage/events" element={<ManageContent />} />
-              <Route path="/treasury" element={<Treasury />} />
-              <Route path="/records" element={<Records />} />
-              <Route path="/media" element={<WorshipMedia />} />
-              <Route path="/pastor-desk" element={<PastorDesk />} />
+              <Route path="/admin" element={<RequireStaffAccess allow={(auth) => auth.isAdmin || auth.isPastor}><Admin /></RequireStaffAccess>} />
+              <Route path="/admin/people" element={<RequireStaffAccess allow={(auth) => auth.isAdmin || auth.isPastor}><Admin initialTab="people" /></RequireStaffAccess>} />
+              <Route path="/admin/departments" element={<RequireStaffAccess allow={(auth) => auth.isAdmin || auth.isPastor}><Admin initialTab="heads" /></RequireStaffAccess>} />
+              <Route path="/admin/invitations" element={<RequireStaffAccess allow={(auth) => auth.isAdmin}><Admin initialTab="invite" /></RequireStaffAccess>} />
+              <Route path="/workspace" element={<RequireStaffAccess allow={(auth) => auth.isStaff}><Workspace /></RequireStaffAccess>} />
+              <Route path="/manage/events" element={<RequireStaffAccess allow={(auth) => auth.isStaff}><ManageContent /></RequireStaffAccess>} />
+              <Route path="/treasury" element={<RequireStaffAccess allow={(auth) => auth.isTreasurer}><Treasury /></RequireStaffAccess>} />
+              <Route path="/records" element={<RequireStaffAccess allow={(auth) => auth.isStaff}><Records /></RequireStaffAccess>} />
+              <Route path="/media" element={<RequireStaffAccess allow={(auth) => auth.canManageMedia || auth.isAdmin || auth.isPastor}><WorshipMedia /></RequireStaffAccess>} />
+              <Route path="/pastor-desk" element={<RequireStaffAccess allow={(auth) => auth.isPastor}><PastorDesk /></RequireStaffAccess>} />
               <Route path="/privacy" element={<Privacy />} />
               <Route path="*" element={<NotFound />} />
             </Routes>

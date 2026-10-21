@@ -734,4 +734,30 @@ grant select, insert, update, delete
 on public.finance_reports
 to authenticated;
 
+insert into public.bank_accounts (
+  name,
+  bank_name,
+  account_number,
+  currency,
+  statement_balance,
+  created_by
+)
+select
+  'AIC Hola M-PESA Paybill Collection',
+  'Equity Bank',
+  '802200',
+  'KES',
+  0,
+  admin.id
+from public.profiles admin
+where admin.role = 'admin'
+  and admin.status = 'active'
+  and not exists (
+    select 1
+    from public.bank_accounts
+    where account_number = '802200'
+  )
+order by admin.created_at
+limit 1;
+
 commit;

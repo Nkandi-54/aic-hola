@@ -57,16 +57,20 @@ export default function Sermons() {
     void fetchSermons();
 
     if (isSupabaseConfigured) {
-      channel = supabase
-        .channel("public:sermons_feed")
-        .on(
-          "postgres_changes",
-          { event: "*", schema: "public", table: "sermons" },
-          () => {
-            void fetchSermons();
-          },
-        )
-        .subscribe();
+      try {
+        channel = supabase
+          .channel("public:sermons_feed")
+          .on(
+            "postgres_changes",
+            { event: "*", schema: "public", table: "sermons" },
+            () => {
+              void fetchSermons();
+            },
+          )
+          .subscribe();
+      } catch {
+        channel = null;
+      }
     }
 
     return () => {
